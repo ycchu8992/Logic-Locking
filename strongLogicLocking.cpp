@@ -161,9 +161,7 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 void selectGateLocationRandomly(int& pos){
     do{
         pos = rand()%(netlist.size());
-
     }while(netlist[pos].isLocked);
-//cout<<pos<<endl;	
     return;
 }
 
@@ -246,7 +244,7 @@ int main(int argv, char* argc[]) {
 	srand(time(0));	
 	// Apply logical lockign on circuit with SLL technique	
 	//cout<<" Numbers of Gates:"<< netlist.size() <<endl;	
-	int keySize = netlist.size()-outputs.size();
+	int keySize = (netlist.size()-outputs.size())/5;
 	if(keySize>128) keySize=128;
 	if(keySize<4) keySize = 4; 
 	string str = "11101010010001001011111010100100010010111110101001000100101111101010010001001011010111101000101010010100010100100101000010010101";
