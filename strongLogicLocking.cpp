@@ -83,36 +83,6 @@ void parseBenchFile(const string& filename) {
 }
 
 
-void addNotGate(const int loc, vector<Gate>& keyGateLocations) {
-	// loc: the location of a gate. The key gate will be insert at its output.
-	// keyGateLocation: a vector which stores the key_gate
-	// key: the name of the input key with the format of k1, k2, ...;
-
-
-	Gate NotGate;
-	NotGate.type = "NOT"; //when the corresponding key_value is zero;
-
-	// Change the name of the output wire of the gate to be locked;
-
-	string org_out = netlist[loc].output;
-	netlist[loc].output = org_out+"_inv";
-	netlist[loc].isLocked = true;
-	//The output [of the locked gate] will be the input of the keygate
-	NotGate.inputs.push_back(netlist[loc].output);
-
-
-	//The output of the key gate use the original name for simplisity of implementation.
-	NotGate.output = org_out;
-	NotGate.isKeyGate = true;
-	NotGate.isLocked = true;
-	vector<Gate>::iterator it;
-	it = netlist.begin();
-	
-	// The location is the place of the locked gate; therefore the key gate must insert at its next position.
-	netlist.insert(it+loc+1, NotGate);
-
-	keyGateLocations.push_back(NotGate);
-}
 
 void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bit) {
 	// loc: the location of a gate. The key gate will be insert at its output.
@@ -123,10 +93,10 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 	inputs.push_back(key);
 
 	Gate keyGate;
-	keyGate.type = "XOR"; //when the corresponding key_value is zero;
+	if(keyString[key_bit]=='0') keyGate.type = "XOR"; //when the corresponding key_value is zero;
+	else keyGate.type = "XNOR";
 
 	// Change the name of the output wire of the gate to be locked;
-
 	string org_out = netlist[loc].output;
 	netlist[loc].output = org_out+"_lock";
 	netlist[loc].isLocked = true;
@@ -138,7 +108,7 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 	//The output of the key gate use the original name for simplisity of implementation.
 	keyGate.output = org_out;
 	keyGate.isKeyGate = true;
-	if(keyString[key_bit]=='0') keyGate.isLocked=true;
+	keyGate.isLocked=true;
 	
 	vector<Gate>::iterator it;
 	it = netlist.begin();
@@ -147,17 +117,13 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 	netlist.insert(it+loc+1, keyGate);
 
 	keyGateLocations.push_back(keyGate);
-	if(keyString[key_bit]=='1') addNotGate(loc+1,keyGateLocations);
 	
-	string watch;
-	int tg;
-	if(keyString[key_bit]=='0') tg = loc+2; 
-	else tg = loc+3;  
-	if(tg<netlist.size()){
-		watch = netlist[tg].type;
-		if(watch == "NOT"||watch == "not" || watch =="BUF" || watch=="buf") netlist[tg].isLocked=true; 
-	}
+	if( loc+2 < netlist.size() ){
+		string watch = netlist[loc+2].type;
+		if(watch == "NOT"||watch == "not" || watch =="BUF" || watch=="buf") netlist[loc+2].isLocked=true; 
+	}	
 }
+
 void selectGateLocationRandomly(int& pos){
     do{
         pos = rand()%(netlist.size());
@@ -244,7 +210,7 @@ int main(int argv, char* argc[]) {
 	srand(time(0));	
 	// Apply logical lockign on circuit with SLL technique	
 	//cout<<" Numbers of Gates:"<< netlist.size() <<endl;	
-	int keySize = (netlist.size()-outputs.size())/5;
+	int keySize = (netlist.size()-outputs.size());
 	if(keySize>128) keySize=128;
 	if(keySize<4) keySize = 4; 
 	string str = "11101010010001001011111010100100010010111110101001000100101111101010010001001011010111101000101010010100010100100101000010010101";
