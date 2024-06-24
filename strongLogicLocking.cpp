@@ -6,6 +6,7 @@
 #include<sstream>
 #include<cstdlib>
 #include<ctime>
+#include <unordered_map>
 
 using namespace std;
 
@@ -17,15 +18,22 @@ struct Gate {
     bool isKeyGate;
     bool isLocked;
 };
-
+struct Node{
+	string type;
+	vector<Node*>out_node;
+	vector<Node*>in_node;
+};
 vector<string> inputs; 		// input signal name set
 vector<string> outputs; 	// output signal name set
 vector<Gate> netlist;		// circuit gate set
 string keyString;
 
 void outputLockedCircuit(const string& filename, const string& keyString);
-
+string * pointto;
+Node *pointtonode;
+unordered_map<string, int> stringToID;
 void parseBenchFile(const string& filename) {
+	int numberofgate=0;
 	ifstream file(filename);
 	string line;
 	while (getline(file, line)) {
@@ -45,12 +53,12 @@ void parseBenchFile(const string& filename) {
 			if( line.find('=') < line.size() ) line.replace( line.find('='), 1, " ");
 
 			stringstream ss(line);
-						
+			
 			Gate gate;
 			ss >> gate.output >> gate.type;
 			
 			string input;
-			
+			Node *node;
 			while (ss >> input) {
 				gate.inputs.push_back(input);
 			}
@@ -58,10 +66,22 @@ void parseBenchFile(const string& filename) {
 			gate.isLocked = false;
 			
 			netlist.push_back(gate);
+			stringToID[gate.output] = numberofgate;
+			numberofgate=numberofgate+1;
 		}
 	}
-	
+	pointto = new string[numberofgate];
+	pointtonode = new Node[numberofgate];
+	for(int i=0;i<numberofgate;i++){
+		pointto[i] = netlist[i].output;
+		pointtonode[i].type = netlist[i].type;
+		for (const auto& str : netlist[i].inputs) {
+			pointtonode[i].in_node.push_back(&pointtonode[stringToID[str]]);
+			pointtonode[stringToID[str]].out_node.push_back(&pointtonode[i]);
+		}
+	}
 }
+
 
 void addNotGate(const int loc, vector<Gate>& keyGateLocations) {
 	// loc: the location of a gate. The key gate will be insert at its output.
