@@ -3,7 +3,7 @@
 all: sll
 
 sll: 
-	g++ strongLogicLocking.cpp -o sll.out -std=c++11 
+	g++ RLL.cpp -o sll.out -std=c++11 
 
 .PHONY: run
 run: 

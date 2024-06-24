@@ -29,9 +29,13 @@ vector<Gate> netlist;		// circuit gate set
 string keyString;
 
 void outputLockedCircuit(const string& filename, const string& keyString);
+
 string * pointto;
 Node *pointtonode;
 unordered_map<string, int> stringToID;
+
+int max_key_length = 128;
+
 void parseBenchFile(const string& filename) {
 	int numberofgate=0;
 	ifstream file(filename);
@@ -82,12 +86,26 @@ void parseBenchFile(const string& filename) {
 	}
 }
 
+int searching_for_unlock_gate(int preasent_pos){
+	int srearching_pos = preasent_pos;
+	while(true){
+		if(!netlist[srearching_pos].isLocked && netlist[srearching_pos].type != "OUTPUT" && netlist[srearching_pos].type !="not" && netlist[srearching_pos].type !="NOT" && 
+		netlist[srearching_pos].type != "buf" && netlist[srearching_pos].type != "BUF"){
+			return srearching_pos;
+		}
+		else{
+			srearching_pos ++;
+		}
+	}
+	return srearching_pos;
+}
 
-
-void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bit) {
+void addKeyGate(const int loc, const int& key_bit) {
 	// loc: the location of a gate. The key gate will be insert at its output.
 	// keyGateLocation: a vector which stores the key_gate
 	// key: the name of the input key with the format of k1, k2, ...;
+
+	srand(time(0));
 
 	string key = "keyinput"+to_string(key_bit); 
 	inputs.push_back(key);
@@ -116,66 +134,32 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 	// The location is the place of the locked gate; therefore the key gate must insert at its next position.
 	netlist.insert(it+loc+1, keyGate);
 
-	keyGateLocations.push_back(keyGate);
-	
-	if( loc+2 < netlist.size() ){
-		string watch = netlist[loc+2].type;
-		if(watch == "NOT"||watch == "not" || watch =="BUF" || watch=="buf") netlist[loc+2].isLocked=true; 
-	}	
+		
 }
 
 void selectGateLocationRandomly(int& pos){
-    do{
-        pos = rand()%(netlist.size());
-    }while(netlist[pos].isLocked);
+
+	pos = searching_for_unlock_gate(rand()%(netlist.size()));
+    
     return;
 }
+
 
 
 bool findEdgeType(Gate& gate_j, Gate& key_gate_k){
 	return false;
 }// return false when mutable 
 
-void applyStrongLogicLocking(int keySize) {
-
-	vector<Gate> keyGateLocations = {};
+void applyRandomLogicLocking(int keySize) {
 
 	//Randomly select the location to insert the first key gate.
-	int pos;
-	selectGateLocationRandomly(pos);
+	for(int i=0; i < keySize; i++){
+		int pos;
+		selectGateLocationRandomly(pos);
   
-	addKeyGate(pos, keyGateLocations, 0);
-
-	for(int i=1; i < keySize; i++){
-		bool foundNonMutable = false;
-		for(int j=0;j<netlist.size();j++){
-			if(netlist[j].isKeyGate==false && netlist[j].isLocked==false){
-
-				bool edgeTypes = true; // edgeTypes is true when all edges are nonmutable
-
-				for(int k=0; k<keyGateLocations.size(); k++){
-					
-					// findEdgeType(Gate& gate_j, Gate& key_gate_k) return false when mutable 
-					
-					edgeTypes = findEdgeType(netlist[j], keyGateLocations[k]);
-
-					if(!edgeTypes) break;
-						
-				}
-				if(edgeTypes){
-					addKeyGate(j, keyGateLocations, i);
-					foundNonMutable = true;
-					break;
-				}
-
-			}
-		}
-		if( foundNonMutable == false ) {
-			int rpos;
-			selectGateLocationRandomly(rpos);
-			addKeyGate(rpos,keyGateLocations,i);
-		}
+		addKeyGate(pos, i);
 	}
+	
 }
 
 void outputLockedCircuit(const string& filename, const string& keyString) {
@@ -202,22 +186,49 @@ void outputLockedCircuit(const string& filename, const string& keyString) {
 }
 
 
+string key_generate(int length) {
+    string binary = "";
+    for (int i = length-1; i >= 0; --i) {
+        binary += (rand()%2)?"1":"0";
+    }
+    if (binary.empty()) {
+        binary = "0";
+    }
+    return binary;
+}
+
+int not_buf_counter(){
+	int counter = 0;
+	for(int srearching_pos = 0; srearching_pos < netlist.size(); srearching_pos++){
+
+		if( netlist[srearching_pos].type == "not" || netlist[srearching_pos].type =="NOT" || 
+			netlist[srearching_pos].type == "buf" || netlist[srearching_pos].type == "BUF"){
+				counter ++;
+			}
+	}
+	return counter;
+}
+
 int main(int argv, char* argc[]) {
+
 
 	string filename = argc[1];
 
-	parseBenchFile(filename);
-	srand(time(0));	
+	parseBenchFile(filename);	
 	// Apply logical lockign on circuit with SLL technique	
 	//cout<<" Numbers of Gates:"<< netlist.size() <<endl;	
-	int keySize = (netlist.size()-outputs.size());
-	if(keySize>128) keySize=128;
-	if(keySize<4) keySize = 4; 
-	string str = "11101010010001001011111010100100010010111110101001000100101111101010010001001011010111101000101010010100010100100101000010010101";
-	keyString = str.substr(0,keySize);
-	applyStrongLogicLocking(keySize);  
+	int keySize = netlist.size() - outputs.size() - not_buf_counter();
+	if(keySize>max_key_length) keySize=128; 
 
-	outputLockedCircuit("locked_"+filename, keyString);
+	// cout << keySize<<endl;
+
+
+	keyString = key_generate(keySize);
+
+
+	applyRandomLogicLocking(keySize);  
+
+	outputLockedCircuit("rll_"+filename, keyString);
 
 	return 0;
 }
