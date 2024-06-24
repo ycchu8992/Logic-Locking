@@ -105,7 +105,7 @@ void addKeyGate(const int loc, const int& key_bit) {
 	// keyGateLocation: a vector which stores the key_gate
 	// key: the name of the input key with the format of k1, k2, ...;
 
-	srand(time(0));
+	// srand(time(0));
 
 	string key = "keyinput"+to_string(key_bit); 
 	inputs.push_back(key);
