@@ -247,6 +247,7 @@ void selectFirstGateLocationRandomly(int& pos){
 		checkconv[i]=1;
 		numofconvergence[i] = getConvergence(&originalNetlist[i], checkconv);
 	}
+	
 	pos = 0;
 	int max_conv = numofconvergence[0];
 	for(int i=1;i<numberofgate;i++){
@@ -261,8 +262,9 @@ void selectFirstGateLocationRandomly(int& pos){
 
 int getConvergence(Gate *pointtonode,int *checkconv){
 	node_root.clear();
-	traverseinput(pointtonode,checkconv);
-	traverseoutput(pointtonode,checkconv);
+	//traverseinput(pointtonode,checkconv);
+	
+	//traverseoutput(pointtonode,checkconv);
 	node_num_convergence=0;
 	for(int i=0;i<node_root.size();i++){
 		traverseinputgetConvergence(node_root[i],checkconv);
@@ -272,19 +274,23 @@ int getConvergence(Gate *pointtonode,int *checkconv){
 }
 void traverseinput(Gate *pointtonode,int *checkconv){
 	checkconv[pointtonode->id]=1;
-	if(!(pointtonode->inGates).empty()){
+	if(pointtonode->inGates.size()!=0){
+		
 		for(int i=0;i<(pointtonode->inGates).size();i++){
-				traverseinput(((pointtonode->inGates)[i]),checkconv);
-			}
+		cout<< pointtonode->inGates.size()<<endl;			
+				
+			traverseinput(((pointtonode->inGates)[i]),checkconv);
+		}
 	}
 	
 }
 void traverseoutput(Gate *pointtonode,int *checkconv){
 	checkconv[pointtonode->id]=1;
 	if(!(pointtonode->outGates).empty()){
+		
 		for(int i=0;i<(pointtonode->outGates).size();i++){
-				traverseoutput(((pointtonode->outGates)[i]),checkconv);
-			}
+			traverseoutput(((pointtonode->outGates)[i]),checkconv);
+		}
 	}
 	else{
 		node_root.push_back(pointtonode);
@@ -361,6 +367,7 @@ void applyStrongLogicLocking(int keySize) {
 	int pos;
 	//selectGateLocationRandomly(pos);
 	findGateWithLargestConvRankAndNotLocked(pos);
+	//selectFirstGateLocationRandomly(pos);
   
 	addKeyGate(pos, keyGateLocations, 0);
 
@@ -392,6 +399,7 @@ void applyStrongLogicLocking(int keySize) {
 			int rpos;
 			//selectGateLocationRandomly(rpos);
 			findGateWithLargestConvRankAndNotLocked(rpos);
+			//selectFirstGateLocationRandomly(pos);
 
 			addKeyGate(rpos,keyGateLocations,i);
 		}
