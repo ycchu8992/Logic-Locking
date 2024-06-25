@@ -288,6 +288,7 @@ int getConvergence(Gate *pointtonode,int *checkconv){
 	return node_num_convergence;
 }
 void traverseinput(Gate *pointtonode,int *checkconv){
+	if(checkconv[pointtonode->id]!=0) return;
 	checkconv[pointtonode->id]=1;
 	if(pointtonode->inGates.size()!=0){
 		
@@ -300,6 +301,7 @@ void traverseinput(Gate *pointtonode,int *checkconv){
 	
 }
 void traverseoutput(Gate *pointtonode,int *checkconv){
+	if(checkconv[pointtonode->id]!=0) return;
 	checkconv[pointtonode->id]=1;
 	if(!(pointtonode->outGates).empty()){
 		
