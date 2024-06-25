@@ -12,6 +12,7 @@
 using namespace std;
 
 struct Gate {
+	int id;
     string type; 		// AND, OR, NAND, NOR, NOT, XOR, NXOR
     vector<string> inputs;
     string output; 		// 0 or 1
@@ -32,6 +33,15 @@ string waterMark;		//Ignore
 vector<string> idToOutputWire; // which was declared as string* pointto;
 vector<Gate> originalNetlist; // which was declared as Node* pointtonode;
 unordered_map<string, int> outputWireNameToGateId; // which was named as stringToID;
+
+
+vector<Gate*> node_root;
+int node_num_convergence;
+int getConvergence(Gate *pointtonode,int *checkconv);
+void traverseinput(Gate *pointtonode,int *checkconv);
+void traverseoutput(Gate *pointtonode,int *checkconv);
+void traverseinputgetConvergence(Gate *pointtonode,int *checkconv);
+void outputLockedCircuit(const string& filename, const string& keyString);
 
 /*
 struct Node{
@@ -145,6 +155,7 @@ void parseBenchFile(const string& filename) {
 	}
 	//originalNetlist, outputWireNameToGateId (global); 
 	for(int i=0;i<originalNetlist.size();i++){
+		originalNetlist[i].id=i;
 		for(const auto fanInWireName: originalNetlist[i].inputs){
 			int id = outputWireNameToGateId[fanInWireName];
 			originalNetlist[i].inGates.push_back( & originalNetlist[id] );
@@ -223,6 +234,81 @@ void selectGateLocationRandomly(int& pos){
     }while(netlist[pos].isLocked);
     return;
 }
+
+void selectFirstGateLocationRandomly(int& pos){
+	int numberofgate = originalNetlist.size();
+	int *numofconvergence= new int[numberofgate];
+	int *checkconv = new int[numberofgate];
+	for(int i=0;i<numberofgate;i++){
+		for(int j=0;j<numberofgate;j++){
+			checkconv[j]=0;
+		}
+		numofconvergence[i]=0;
+		checkconv[i]=1;
+		numofconvergence[i] = getConvergence(&originalNetlist[i], checkconv);
+	}
+	pos = 0;
+	int max_conv = numofconvergence[0];
+	for(int i=1;i<numberofgate;i++){
+		if(max_conv<numofconvergence[i]){
+			max_conv = numofconvergence[i];
+			pos = i;
+		}
+	}
+	delete[] numofconvergence;
+	delete[] checkconv;
+}
+
+int getConvergence(Gate *pointtonode,int *checkconv){
+	node_root.clear();
+	traverseinput(pointtonode,checkconv);
+	traverseoutput(pointtonode,checkconv);
+	node_num_convergence=0;
+	for(int i=0;i<node_root.size();i++){
+		traverseinputgetConvergence(node_root[i],checkconv);
+	}
+	node_root.clear();
+	return node_num_convergence;
+}
+void traverseinput(Gate *pointtonode,int *checkconv){
+	checkconv[pointtonode->id]=1;
+	if(!(pointtonode->inGates).empty()){
+		for(int i=0;i<(pointtonode->inGates).size();i++){
+				traverseinput(((pointtonode->inGates)[i]),checkconv);
+			}
+	}
+	
+}
+void traverseoutput(Gate *pointtonode,int *checkconv){
+	checkconv[pointtonode->id]=1;
+	if(!(pointtonode->outGates).empty()){
+		for(int i=0;i<(pointtonode->outGates).size();i++){
+				traverseoutput(((pointtonode->outGates)[i]),checkconv);
+			}
+	}
+	else{
+		node_root.push_back(pointtonode);
+	}
+	
+}
+void traverseinputgetConvergence(Gate *pointtonode,int *checkconv){
+	if(checkconv[pointtonode->id]==0){
+		checkconv[pointtonode->id]=1;
+		if(!(pointtonode->inGates).empty()){
+			if((pointtonode->inGates).size()>1){
+				node_num_convergence=node_num_convergence+1;
+			}
+		}
+	}
+	if(!(pointtonode->inGates).empty()){
+		for(int i=0;i<(pointtonode->inGates).size();i++){
+				traverseinputgetConvergence((pointtonode->inGates)[i],checkconv);
+			}
+	}
+}
+
+
+
 
 void findGateWithLargestConvRankAndNotLocked(int& pos){
 	int max=0;
