@@ -9,22 +9,21 @@ sll:
 run: 
 	./sll.out c17.bench 
 	./sll.out c432.bench 
-	./sll.out c3540.bench
+	./sll.out c3540.bench 
 
 sld: c17 c432 c3540
 
 .PHONY: c3540
 c3540: 
-	-sld -c10 locked_c3540.bench c3540.bench 
-
+	-sld -N 1 -c10 locked_c3540.bench c3540.bench 
 
 .PHONY: c432
 c432: 
-	-sld -c10 locked_c432.bench c432.bench
+	-sld -N 1 -c10 locked_c432.bench c432.bench 
 
 .PHONY: c17
 c17: 
-	-sld -c10 locked_c17.bench c17.bench
+	-sld -N 1 -c10 locked_c17.bench c17.bench 
 
 .PHONY: lcmp
 lcmp: 

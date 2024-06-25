@@ -7,9 +7,9 @@
 #include<cstdlib>
 #include<ctime>
 #include <unordered_map>
-
+#include <set>
+#include <algorithm>
 using namespace std;
-
 
 struct Gate {
     string type; 		// AND, OR, NAND, NOR, NOT, XOR, NXOR
@@ -17,23 +17,63 @@ struct Gate {
     string output; 		// 0 or 1
     bool isKeyGate;
     bool isLocked;
+
+    vector<Gate*> inGates;
+    vector<Gate*> outGates;
+    set<int> gateIdOnPathToCircuitOutput={};
+
 };
-struct Node{
-	string type;
-	vector<Node*>out_node;
-	vector<Node*>in_node;
-};
+
 vector<string> inputs; 		// input signal name set
 vector<string> outputs; 	// output signal name set
 vector<Gate> netlist;		// circuit gate set
 string keyString;
 
-void outputLockedCircuit(const string& filename, const string& keyString);
-string * pointto;
-Node *pointtonode;
-unordered_map<string, int> stringToID;
+vector<string> idToOutputWire; // which was declared as string* pointto;
+vector<Gate> originalNetlist; // which was declared as Node* pointtonode;
+unordered_map<string, int> outputWireNameToGateId; // which was named as stringToID;
+
+/*
+struct Node{
+	string type;
+	vector<Node*>out_node;
+	vector<Node*>in_node;
+};
+*/
+
+void constructGraph(){
+	// Prepare for searching 
+	
+	for(int i = originalNetlist.size()-1; i>=0; i--){
+		// Find the gate output wire name
+		string wire = originalNetlist[i].output;
+		vector<string>::iterator it;
+		it = find(outputs.begin(), outputs.end(), wire);
+
+		
+		//vector<string>::iterator it2;
+		//it2 = find(inputs.begin(),inputs.end(), wire);
+		
+		
+		if( it == outputs.end() ){ 
+			for(int j=0; j<originalNetlist[i].outGates.size();j++){
+				set<int>& nextGate = originalNetlist[i].outGates.at(j)->gateIdOnPathToCircuitOutput;
+				originalNetlist[i].gateIdOnPathToCircuitOutput.insert(nextGate.begin(),nextGate.end());	
+				int id =outputWireNameToGateId[originalNetlist[i].outGates.at(j)->output]; 				
+				originalNetlist[i].gateIdOnPathToCircuitOutput.emplace(id);	
+			}
+		}
+	}
+	return;
+}
+
+	
+
 void parseBenchFile(const string& filename) {
-	int numberofgate=0;
+
+	// The number of gates inside the non-complete netlist which was named as "numberofgate".
+	int curNumOfGate=0;
+
 	ifstream file(filename);
 	string line;
 	while (getline(file, line)) {
@@ -58,20 +98,39 @@ void parseBenchFile(const string& filename) {
 			ss >> gate.output >> gate.type;
 			
 			string input;
-			Node *node;
+			// Node *node;
 			while (ss >> input) {
 				gate.inputs.push_back(input);
 			}
 			gate.isKeyGate = false;
 			gate.isLocked = false;
+
 			
 			netlist.push_back(gate);
-			stringToID[gate.output] = numberofgate;
-			numberofgate=numberofgate+1;
+			originalNetlist.push_back(gate);
+
+			
+			//out.. (global); numberOfGate (local);
+			outputWireNameToGateId[gate.output] = curNumOfGate; //stringToID[gate.output] = numberOfGate;
+			idToOutputWire.push_back(gate.output); 
+							
+
+			curNumOfGate=curNumOfGate+1;
 		}
 	}
-	pointto = new string[numberofgate];
-	pointtonode = new Node[numberofgate];
+	//originalNetlist, outputWireNameToGateId (global); 
+	for(int i=0;i<originalNetlist.size();i++){
+		for(const auto fanInWireName: originalNetlist[i].inputs){
+			int id = outputWireNameToGateId[fanInWireName];
+			originalNetlist[i].inGates.push_back( & originalNetlist[id] );
+			originalNetlist[id].outGates.push_back( & originalNetlist[i] );
+		}		
+	}
+
+
+	/* pointto = new string[numberofgate]; 		
+	 pointtonode = new Node[numberofgate];
+	
 	for(int i=0;i<numberofgate;i++){
 		pointto[i] = netlist[i].output;
 		pointtonode[i].type = netlist[i].type;
@@ -79,7 +138,10 @@ void parseBenchFile(const string& filename) {
 			pointtonode[i].in_node.push_back(&pointtonode[stringToID[str]]);
 			pointtonode[stringToID[str]].out_node.push_back(&pointtonode[i]);
 		}
-	}
+	}*/
+
+	constructGraph();
+//for(int i=0; i< originalNetlist.size();i++)  cout << originalNetlist[i].gateIdOnPathToCircuitOutput.size()<<endl;
 }
 
 
@@ -109,7 +171,11 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 	keyGate.output = org_out;
 	keyGate.isKeyGate = true;
 	keyGate.isLocked=true;
-	
+	int id = outputWireNameToGateId[org_out];
+
+	//Assume that the lock gate is added immediate at the output of the locked gate.  
+	keyGate.gateIdOnPathToCircuitOutput = originalNetlist[id].gateIdOnPathToCircuitOutput;
+
 	vector<Gate>::iterator it;
 	it = netlist.begin();
 	
@@ -123,7 +189,6 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 		if(watch == "NOT"||watch == "not" || watch =="BUF" || watch=="buf") netlist[loc+2].isLocked=true; 
 	}	
 }
-
 void selectGateLocationRandomly(int& pos){
     do{
         pos = rand()%(netlist.size());
@@ -133,7 +198,15 @@ void selectGateLocationRandomly(int& pos){
 
 
 bool findEdgeType(Gate& gate_j, Gate& key_gate_k){
-	return false;
+	
+	int id = outputWireNameToGateId[gate_j.output];
+	
+	if(key_gate_k.gateIdOnPathToCircuitOutput.count(id)){
+		//the Gatej is on the path from the keygate to the outputsignal which is potentially mutalbe; therefore return false
+		return false;
+	}else return true; 
+
+	
 }// return false when mutable 
 
 void applyStrongLogicLocking(int keySize) {
@@ -158,7 +231,6 @@ void applyStrongLogicLocking(int keySize) {
 					// findEdgeType(Gate& gate_j, Gate& key_gate_k) return false when mutable 
 					
 					edgeTypes = findEdgeType(netlist[j], keyGateLocations[k]);
-
 					if(!edgeTypes) break;
 						
 				}
@@ -201,6 +273,17 @@ void outputLockedCircuit(const string& filename, const string& keyString) {
     }
 }
 
+int not_buf_counter(){
+	int counter = 0;
+	for(int srearching_pos = 0; srearching_pos < netlist.size(); srearching_pos++){
+
+		if( netlist[srearching_pos].type == "not" || netlist[srearching_pos].type =="NOT" || 
+			netlist[srearching_pos].type == "buf" || netlist[srearching_pos].type == "BUF"){
+				counter ++;
+			}
+	}
+	return counter;
+}
 
 int main(int argv, char* argc[]) {
 
@@ -209,8 +292,7 @@ int main(int argv, char* argc[]) {
 	parseBenchFile(filename);
 	srand(time(0));	
 	// Apply logical lockign on circuit with SLL technique	
-	//cout<<" Numbers of Gates:"<< netlist.size() <<endl;	
-	int keySize = (netlist.size()-outputs.size());
+	int keySize = (netlist.size()-outputs.size()-not_buf_counter());
 	if(keySize>128) keySize=128;
 	if(keySize<4) keySize = 4; 
 	string str = "11101010010001001011111010100100010010111110101001000100101111101010010001001011010111101000101010010100010100100101000010010101";
@@ -218,6 +300,5 @@ int main(int argv, char* argc[]) {
 	applyStrongLogicLocking(keySize);  
 
 	outputLockedCircuit("locked_"+filename, keyString);
-
 	return 0;
 }
