@@ -30,10 +30,6 @@ string keyString;
 
 void outputLockedCircuit(const string& filename, const string& keyString);
 
-string * pointto;
-Node *pointtonode;
-unordered_map<string, int> stringToID;
-
 int max_key_length = 128;
 
 void parseBenchFile(const string& filename) {
@@ -70,20 +66,10 @@ void parseBenchFile(const string& filename) {
 			gate.isLocked = false;
 			
 			netlist.push_back(gate);
-			stringToID[gate.output] = numberofgate;
-			numberofgate=numberofgate+1;
+			
 		}
 	}
-	pointto = new string[numberofgate];
-	pointtonode = new Node[numberofgate];
-	for(int i=0;i<numberofgate;i++){
-		pointto[i] = netlist[i].output;
-		pointtonode[i].type = netlist[i].type;
-		for (const auto& str : netlist[i].inputs) {
-			pointtonode[i].in_node.push_back(&pointtonode[stringToID[str]]);
-			pointtonode[stringToID[str]].out_node.push_back(&pointtonode[i]);
-		}
-	}
+	
 }
 
 int searching_for_unlock_gate(int preasent_pos){
