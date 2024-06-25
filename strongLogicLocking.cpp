@@ -158,6 +158,21 @@ void parseBenchFile(const string& filename) {
 		originalNetlist[i].id=i;
 		for(const auto fanInWireName: originalNetlist[i].inputs){
 			int id = outputWireNameToGateId[fanInWireName];
+			
+
+		
+		
+			bool findInputWire = false;
+			for(int j=0; j<originalNetlist[i].inputs.size();j++){
+				vector<string>::iterator it;
+				it = find(inputs.begin(), inputs.end(), originalNetlist[i].inputs.at(j));
+				if( it != inputs.end() ) {
+					findInputWire = true;
+					break;
+				}	
+			}
+			if(findInputWire) continue;
+
 			originalNetlist[i].inGates.push_back( & originalNetlist[id] );
 			originalNetlist[id].outGates.push_back( & originalNetlist[i] );
 		}
@@ -262,9 +277,9 @@ void selectFirstGateLocationRandomly(int& pos){
 
 int getConvergence(Gate *pointtonode,int *checkconv){
 	node_root.clear();
-	//traverseinput(pointtonode,checkconv);
+	traverseinput(pointtonode,checkconv);
 	
-	//traverseoutput(pointtonode,checkconv);
+	traverseoutput(pointtonode,checkconv);
 	node_num_convergence=0;
 	for(int i=0;i<node_root.size();i++){
 		traverseinputgetConvergence(node_root[i],checkconv);
@@ -277,7 +292,7 @@ void traverseinput(Gate *pointtonode,int *checkconv){
 	if(pointtonode->inGates.size()!=0){
 		
 		for(int i=0;i<(pointtonode->inGates).size();i++){
-		cout<< pointtonode->inGates.size()<<endl;			
+		//cout<< pointtonode->inGates.size()<<endl;			
 				
 			traverseinput(((pointtonode->inGates)[i]),checkconv);
 		}
@@ -366,8 +381,8 @@ void applyStrongLogicLocking(int keySize) {
 	//Randomly select the location to insert the first key gate.
 	int pos;
 	//selectGateLocationRandomly(pos);
-	findGateWithLargestConvRankAndNotLocked(pos);
-	//selectFirstGateLocationRandomly(pos);
+	//findGateWithLargestConvRankAndNotLocked(pos);
+	selectFirstGateLocationRandomly(pos);
   
 	addKeyGate(pos, keyGateLocations, 0);
 
@@ -398,8 +413,8 @@ void applyStrongLogicLocking(int keySize) {
 		if( foundNonMutable == false ) {
 			int rpos;
 			//selectGateLocationRandomly(rpos);
-			findGateWithLargestConvRankAndNotLocked(rpos);
-			//selectFirstGateLocationRandomly(pos);
+			//findGateWithLargestConvRankAndNotLocked(rpos);
+			selectFirstGateLocationRandomly(pos);
 
 			addKeyGate(rpos,keyGateLocations,i);
 		}
