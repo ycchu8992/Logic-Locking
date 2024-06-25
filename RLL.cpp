@@ -18,11 +18,6 @@ struct Gate {
     bool isKeyGate;
     bool isLocked;
 };
-struct Node{
-	string type;
-	vector<Node*>out_node;
-	vector<Node*>in_node;
-};
 vector<string> inputs; 		// input signal name set
 vector<string> outputs; 	// output signal name set
 vector<Gate> netlist;		// circuit gate set
@@ -58,7 +53,6 @@ void parseBenchFile(const string& filename) {
 			ss >> gate.output >> gate.type;
 			
 			string input;
-			Node *node;
 			while (ss >> input) {
 				gate.inputs.push_back(input);
 			}
