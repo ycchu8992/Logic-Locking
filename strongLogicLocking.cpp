@@ -41,6 +41,25 @@ struct Node{
 };
 */
 
+void computeCoverageRank(){
+	for(int i=0;i<originalNetlist.size();i++){
+		for(int j=0;j<originalNetlist.size();j++){
+			if(i>=j) continue;
+			else if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(j)) continue;
+			else if(originalNetlist[j].gateIdOnPathToCircuitOutput.count(i)) continue;
+
+			set<int>::iterator it; 
+			for(it = originalNetlist[j].gateIdOnPathToCircuitOutput.begin(); it!= originalNetlist[j].gateIdOnPathToCircuitOutput.end(); ++it ){
+				if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(*it)){
+					originalNetlist[i].convergeRank++;
+					break;
+				}
+				
+			}
+				
+		}
+	}
+}
 
 void constructGraph(){
 	// Prepare for searching 
@@ -148,6 +167,8 @@ void parseBenchFile(const string& filename) {
 	}*/
 
 	constructGraph();
+
+	//computeCoverageRank(); high_time complexity
 	//for(int i=0; i< originalNetlist.size();i++)  cout << originalNetlist[i].gateIdOnPathToCircuitOutput.size()<<endl;
 }
 
@@ -203,25 +224,6 @@ void selectGateLocationRandomly(int& pos){
     return;
 }
 
-void computeCoverageRank(){
-	for(int i=0;i<originalNetlist.size();i++){
-		for(int j=0;j<originalNetlist.size();j++){
-			if(i>=j) continue;
-			else if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(j)) continue;
-			else if(originalNetlist[j].gateIdOnPathToCircuitOutput.count(i)) continue;
-
-			set<int>::iterator it; 
-			for(it = originalNetlist[j].gateIdOnPathToCircuitOutput.begin(); it!= originalNetlist[j].gateIdOnPathToCircuitOutput.end(); ++it ){
-				if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(*it)){
-					originalNetlist[i].convergeRank++;
-					break;
-				}
-				
-			}
-				
-		}
-	}
-}
 void findGateWithLargestConvRankAndNotLocked(int& pos){
 	int max=0;
 	for(int i=0;i<originalNetlist.size();i++){
