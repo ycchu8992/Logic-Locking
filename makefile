@@ -5,24 +5,29 @@ all: sll
 sll: 
 	g++ strongLogicLocking.cpp -o sll.out -std=c++11 
 
-.PHONY: run
-run: 
+.PHONY: runs
+runs:
 	./sll.out c17.bench 
 	./sll.out c432.bench 
 	./sll.out c3540.bench 
+.PHONY: runr
+runr:
+	./rll.out c17.bench 
+	./rll.out c432.bench 
+	./rll.out c3540.bench 
 
-sld: c17 c432 c3540
+sld: c17_sll c432_sll c3540_sll
 
-.PHONY: c3540
-c3540: 
+.PHONY: c3540_sll
+c3540_sll: 
 	-sld -N 1 -c10 locked_c3540.bench c3540.bench 
 
-.PHONY: c432
-c432: 
+.PHONY: c432_sll
+c432_sll: 
 	-sld -N 1 -c10 locked_c432.bench c432.bench 
 
-.PHONY: c17
-c17: 
+.PHONY: c17_sll
+c17_sll: 
 	-sld -N 1 -c10 locked_c17.bench c17.bench 
 
 .PHONY: lcmp

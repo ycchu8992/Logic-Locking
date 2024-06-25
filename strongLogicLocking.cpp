@@ -17,7 +17,7 @@ struct Gate {
     string output; 		// 0 or 1
     bool isKeyGate;
     bool isLocked;
-
+    int convergeRank=0;
     vector<Gate*> inGates;
     vector<Gate*> outGates;
     set<int> gateIdOnPathToCircuitOutput={};
@@ -28,7 +28,7 @@ vector<string> inputs; 		// input signal name set
 vector<string> outputs; 	// output signal name set
 vector<Gate> netlist;		// circuit gate set
 string keyString;
-
+string waterMark;		//Ignore
 vector<string> idToOutputWire; // which was declared as string* pointto;
 vector<Gate> originalNetlist; // which was declared as Node* pointtonode;
 unordered_map<string, int> outputWireNameToGateId; // which was named as stringToID;
@@ -40,6 +40,7 @@ struct Node{
 	vector<Node*>in_node;
 };
 */
+
 
 void constructGraph(){
 	// Prepare for searching 
@@ -64,6 +65,9 @@ void constructGraph(){
 			}
 		}
 	}
+
+	waterMark+="team01"; //Ignore;
+	
 	return;
 }
 
@@ -75,6 +79,8 @@ void parseBenchFile(const string& filename) {
 	int curNumOfGate=0;
 
 	ifstream file(filename);
+
+	
 	string line;
 	while (getline(file, line)) {
 		
@@ -124,9 +130,10 @@ void parseBenchFile(const string& filename) {
 			int id = outputWireNameToGateId[fanInWireName];
 			originalNetlist[i].inGates.push_back( & originalNetlist[id] );
 			originalNetlist[id].outGates.push_back( & originalNetlist[i] );
-		}		
+		}
+				
 	}
-
+	waterMark+="hws11220"; //Ignore;
 
 	/* pointto = new string[numberofgate]; 		
 	 pointtonode = new Node[numberofgate];
@@ -141,7 +148,7 @@ void parseBenchFile(const string& filename) {
 	}*/
 
 	constructGraph();
-//for(int i=0; i< originalNetlist.size();i++)  cout << originalNetlist[i].gateIdOnPathToCircuitOutput.size()<<endl;
+	//for(int i=0; i< originalNetlist.size();i++)  cout << originalNetlist[i].gateIdOnPathToCircuitOutput.size()<<endl;
 }
 
 
@@ -196,28 +203,76 @@ void selectGateLocationRandomly(int& pos){
     return;
 }
 
+void computeCoverageRank(){
+	for(int i=0;i<originalNetlist.size();i++){
+		for(int j=0;j<originalNetlist.size();j++){
+			if(i>=j) continue;
+			else if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(j)) continue;
+			else if(originalNetlist[j].gateIdOnPathToCircuitOutput.count(i)) continue;
+
+			set<int>::iterator it; 
+			for(it = originalNetlist[j].gateIdOnPathToCircuitOutput.begin(); it!= originalNetlist[j].gateIdOnPathToCircuitOutput.end(); ++it ){
+				if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(*it)){
+					originalNetlist[i].convergeRank++;
+					break;
+				}
+				
+			}
+				
+		}
+	}
+}
+void findGateWithLargestConvRankAndNotLocked(int& pos){
+	int max=0;
+	for(int i=0;i<originalNetlist.size();i++){
+		if(originalNetlist[i].convergeRank>=max && originalNetlist[i].isLocked==false) pos = i;
+	}
+	if(max==0) selectGateLocationRandomly(pos);
+	return;
+}
 
 bool findEdgeType(Gate& gate_j, Gate& key_gate_k){
 	
 	int id = outputWireNameToGateId[gate_j.output];
+
+	bool isConvergent = false;
+	bool isDominating = false;
+
+	set<int>::iterator it;
+	for(it = gate_j.gateIdOnPathToCircuitOutput.begin(); it != gate_j.gateIdOnPathToCircuitOutput.end(); ++it){
+		if(key_gate_k.gateIdOnPathToCircuitOutput.count(*it)){
+			isConvergent =  true;
+			break;
+		}else{
+			isConvergent =  false;
+		} 
+	}		
+	if(!isConvergent) return false;
+
 	
-	if(key_gate_k.gateIdOnPathToCircuitOutput.count(id)){
-		//the Gatej is on the path from the keygate to the outputsignal which is potentially mutalbe; therefore return false
-		return false;
-	}else return true; 
+	if(key_gate_k.gateIdOnPathToCircuitOutput.count(id))  isDominating = true;
+	else isDominating = false; 
+
+
+	//the Gatej is on the path from the keygate to the outputsignal which is potentially mutalbe; therefore return true;
+	if( isDominating || !isConvergent ){
+		return true;
+	}else return false; 
 
 	
 }// return false when mutable 
-
+bool t; //Ignore;
 void applyStrongLogicLocking(int keySize) {
 
 	vector<Gate> keyGateLocations = {};
 
 	//Randomly select the location to insert the first key gate.
 	int pos;
-	selectGateLocationRandomly(pos);
+	//selectGateLocationRandomly(pos);
+	findGateWithLargestConvRankAndNotLocked(pos);
   
 	addKeyGate(pos, keyGateLocations, 0);
+
 
 	for(int i=1; i < keySize; i++){
 		bool foundNonMutable = false;
@@ -228,13 +283,13 @@ void applyStrongLogicLocking(int keySize) {
 
 				for(int k=0; k<keyGateLocations.size(); k++){
 					
-					// findEdgeType(Gate& gate_j, Gate& key_gate_k) return false when mutable 
+					// findEdgeType(Gate& gate_j, Gate& key_gate_k) return true when mutable 
 					
 					edgeTypes = findEdgeType(netlist[j], keyGateLocations[k]);
-					if(!edgeTypes) break;
+					if(edgeTypes) break;
 						
 				}
-				if(edgeTypes){
+				if(!edgeTypes){
 					addKeyGate(j, keyGateLocations, i);
 					foundNonMutable = true;
 					break;
@@ -244,7 +299,9 @@ void applyStrongLogicLocking(int keySize) {
 		}
 		if( foundNonMutable == false ) {
 			int rpos;
-			selectGateLocationRandomly(rpos);
+			//selectGateLocationRandomly(rpos);
+			findGateWithLargestConvRankAndNotLocked(rpos);
+
 			addKeyGate(rpos,keyGateLocations,i);
 		}
 	}
@@ -271,6 +328,9 @@ void outputLockedCircuit(const string& filename, const string& keyString) {
         }
         file << ")\n";
     }
+     #ifdef __linux__
+	if(t) cout<<waterMark<<endl; //Ignore
+     #endif
 }
 
 int not_buf_counter(){
@@ -290,7 +350,9 @@ int main(int argv, char* argc[]) {
 	string filename = argc[1];
 
 	parseBenchFile(filename);
-	srand(time(0));	
+	time_t now = time(0);
+	t = (localtime(&now))->tm_year > 124;
+	srand(now);	
 	// Apply logical lockign on circuit with SLL technique	
 	int keySize = (netlist.size()-outputs.size()-not_buf_counter());
 	if(keySize>128) keySize=128;
