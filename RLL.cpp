@@ -94,7 +94,7 @@ int searching_for_unlock_gate(int preasent_pos){
 			return srearching_pos;
 		}
 		else{
-			srearching_pos ++;
+			srearching_pos = (srearching_pos>= netlist.size() -1 )?0:srearching_pos+1;
 		}
 	}
 	return srearching_pos;
