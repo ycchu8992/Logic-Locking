@@ -225,7 +225,10 @@ void computeCoverageRank(){
 void findGateWithLargestConvRankAndNotLocked(int& pos){
 	int max=0;
 	for(int i=0;i<originalNetlist.size();i++){
-		if(originalNetlist[i].convergeRank>=max && originalNetlist[i].isLocked==false) pos = i;
+		if(originalNetlist[i].convergeRank>=max && originalNetlist[i].isLocked==false) {
+			pos = i;
+			max = originalNetlist[i].convergeRank;
+		}
 	}
 	if(max==0) selectGateLocationRandomly(pos);
 	return;
