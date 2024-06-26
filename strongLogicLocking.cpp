@@ -12,64 +12,53 @@
 using namespace std;
 
 struct Gate {
-	int id;
-    string type; 		// AND, OR, NAND, NOR, NOT, XOR, NXOR
-    vector<string> inputs;
-    string output; 		// 0 or 1
-    bool isKeyGate;
-    bool isLocked;
-    int convergeRank=0;
-    vector<Gate*> inGates;
-    vector<Gate*> outGates;
-    set<int> gateIdOnPathToCircuitOutput={};
+    string type; 				// The type of a gate. e.g. AND, OR, NAND, NOR, NOT, XOR, NXOR
+    vector<string> inputs;			// The fanin wires' names.
+    string output; 				// 0 or 1
+    bool isKeyGate;				// A mark of whether a gate is a key gate.
+    bool isLocked;				// whther the gate is locked. this is aim to avoid run of key gates
+    int convergeRank=0;	 		// Deprecated. The converage related parts are now handled by others.
+    vector<Gate*> inGates;			// This vector stores the immediate gate that points (direclty) to this gate.
+    vector<Gate*> outGates;			// Same logic as inGates.
+    set<int> gateIdOnPathToCircuitOutput={}; 	//All the gates' number of originalNetlist which exist on the path  
+						//from this gate to the final output will store at here.
+
+    int id;
+	
 
 };
 
-vector<string> inputs; 		// input signal name set
-vector<string> outputs; 	// output signal name set
-vector<Gate> netlist;		// circuit gate set
-string keyString;
-string waterMark;		//Ignore
-vector<string> idToOutputWire; // which was declared as string* pointto;
-vector<Gate> originalNetlist; // which was declared as Node* pointtonode;
-unordered_map<string, int> outputWireNameToGateId; // which was named as stringToID;
+vector<string> inputs; 					// input signal name set
+vector<string> outputs;				 	// output signal name set
+vector<Gate> netlist;					// a set of circuit gates 
+string keyString;					// The 	keyString of the locked gate.
+string waterMark;					// Ignore
+vector<string> idToOutputWire; 				// which was declared as string* pointto;
+vector<Gate> originalNetlist; 				// which was declared as Node* pointtonode;
+unordered_map<string, int> outputWireNameToGateId; 	// which was named as stringToID;
 
 
 vector<Gate*> node_root;
 int node_num_convergence;
+
+void selectFirstGateLocationRandomly(int& pos);
 int getConvergence(Gate *pointtonode,int *checkconv);
 void traverseinput(Gate *pointtonode,int *checkconv);
 void traverseoutput(Gate *pointtonode,int *checkconv);
 void traverseinputgetConvergence(Gate *pointtonode,int *checkconv);
+int not_buf_counter();
+
+void constructGraph();
+void parseBenchFile(const string& filename);
+void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bit);
+bool findEdgeType(Gate& gate_j, Gate& key_gate_k);
+void applyStrongLogicLocking(int keySize);
 void outputLockedCircuit(const string& filename, const string& keyString);
+void outputLockedCircuit(const string& filename, const string& keyString);
+void findGateWithLargestConvRankAndNotLocked(int& pos);
+void computeCoverageRank();
+void selectGateLocationRandomly(int& pos);
 
-/*
-struct Node{
-	string type;
-	vector<Node*>out_node;
-	vector<Node*>in_node;
-};
-*/
-
-void computeCoverageRank(){
-	for(int i=0;i<originalNetlist.size();i++){
-		for(int j=0;j<originalNetlist.size();j++){
-			if(i>=j) continue;
-			else if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(j)) continue;
-			else if(originalNetlist[j].gateIdOnPathToCircuitOutput.count(i)) continue;
-
-			set<int>::iterator it; 
-			for(it = originalNetlist[j].gateIdOnPathToCircuitOutput.begin(); it!= originalNetlist[j].gateIdOnPathToCircuitOutput.end(); ++it ){
-				if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(*it)){
-					originalNetlist[i].convergeRank++;
-					break;
-				}
-				
-			}
-				
-		}
-	}
-}
 
 void constructGraph(){
 	// Prepare for searching 
@@ -80,11 +69,6 @@ void constructGraph(){
 		vector<string>::iterator it;
 		it = find(outputs.begin(), outputs.end(), wire);
 
-		
-		//vector<string>::iterator it2;
-		//it2 = find(inputs.begin(),inputs.end(), wire);
-		
-		
 		if( it == outputs.end() ){ 
 			for(int j=0; j<originalNetlist[i].outGates.size();j++){
 				set<int>& nextGate = originalNetlist[i].outGates.at(j)->gateIdOnPathToCircuitOutput;
@@ -100,59 +84,100 @@ void constructGraph(){
 	return;
 }
 
-	
-
 void parseBenchFile(const string& filename) {
+	// Open the flie with the same filename in the same directory ( of this program ).
+	// The	following program does not handle the error of wrong format in the file.
 
 	// The number of gates inside the non-complete netlist which was named as "numberofgate".
+	// This value will accumulate when a gate (inside the bench ) is sucessfully read.
 	int curNumOfGate=0;
 
+
+	// Open the file
 	ifstream file(filename);
 
-	
+	// Declare a string variable to store the un-parsed line.
 	string line;
+
+	//Get a line from the file. If no line ( EOF ), the loop ends.
 	while (getline(file, line)) {
 		
+		//If a line is the input signal, "INPUT" can find at the line of position 0.
 		if (line.find("INPUT")==0 ) {
+
+			// Push the wire name of line into the vector inputs, which stores all the input signal in this bench.
+			// vecotr<string> inputs at here is a global variable.
+			// since the sizeof INPUT is 5 and following with a '(', we fetch the line from 6th position
+			// Question: there is assumption, the format of bench is INPUT(...) 
+			
 			inputs.push_back(line.substr(6, line.size() - 7));
+
 		} else if (line.find("OUTPUT")==0) {
+
+			//Lookup the comment of INPUT if neccesary.
 			outputs.push_back(line.substr(7, line.size() - 8));
 			
 		} else {
+		
+			// The bench may or maynot contain an empty string between a Signal declaration and gates.
+			if(line=="\0") continue;	// Skipped when line is empty..
 			
-			// Skipped when line is empty..
-			if(line=="\0") continue;
+			//The following statements replace the format sparated by " " which is for the stringstream.
+
 			if( line.find('(') < line.size() ) line.replace( line.find('('), 1, " ");
 			if( line.find(')') < line.size() ) line.replace( line.find(')'), 1, " ");
+			
+			// Since the gates may contain several inputs, we use while loop to parse.
 			while( line.find(',') < line.size() ) line.replace( line.find(','), 1, " ");
 			if( line.find('=') < line.size() ) line.replace( line.find('='), 1, " ");
 
+			 
 			stringstream ss(line);
 			
+			// Declare a gate 
 			Gate gate;
+
+			// Stringstream will seperate the string by " " and throw it one by one.
 			ss >> gate.output >> gate.type;
 			
+			//This string temporary stores the name of the input wire of gates.
 			string input;
-			// Node *node;
+			
 			while (ss >> input) {
+				
+				// Push the wire name to the gate structure.
+				// That is, we can fetch the input wires from the gate structure.
 				gate.inputs.push_back(input);
 			}
+			
+			//Mark this gate as non keygate.
 			gate.isKeyGate = false;
+
+			//Mark this gate as unlocked. It will set to true when there is a logic locking  gate at its output immediately.
 			gate.isLocked = false;
 
-			
+			//The netlist stores all the gate inside the bench, including key gates inserted later.
 			netlist.push_back(gate);
+
+			// originalNetlist is same as netlist, yet the contain will not change after initiallization.
+			// When look up the path from gate to output signal or find the original gates / gates' wire, etc.  
 			originalNetlist.push_back(gate);
 
 			
 			//out.. (global); numberOfGate (local);
-			outputWireNameToGateId[gate.output] = curNumOfGate; //stringToID[gate.output] = numberOfGate;
+			
+			//Create the mapping table of each gates' output wire to its corresponding index number inside the originalNetlist.
+			outputWireNameToGateId[gate.output] = curNumOfGate;
+		
+			//Create the mapping table from index number ( of originalNetlist ) to the name of output wires.
 			idToOutputWire.push_back(gate.output); 
 							
-
+			// A gate is suceesfully read, update the curNumOfGate. 
 			curNumOfGate=curNumOfGate+1;
 		}
 	}
+
+
 	//originalNetlist, outputWireNameToGateId (global); 
 	for(int i=0;i<originalNetlist.size();i++){
 		originalNetlist[i].id=i;
@@ -180,24 +205,10 @@ void parseBenchFile(const string& filename) {
 	}
 	waterMark+="hws11220"; //Ignore;
 
-	/* pointto = new string[numberofgate]; 		
-	 pointtonode = new Node[numberofgate];
-	
-	for(int i=0;i<numberofgate;i++){
-		pointto[i] = netlist[i].output;
-		pointtonode[i].type = netlist[i].type;
-		for (const auto& str : netlist[i].inputs) {
-			pointtonode[i].in_node.push_back(&pointtonode[stringToID[str]]);
-			pointtonode[stringToID[str]].out_node.push_back(&pointtonode[i]);
-		}
-	}*/
-
 	constructGraph();
 
-	//computeCoverageRank(); high_time complexity
-	//for(int i=0; i< originalNetlist.size();i++)  cout << originalNetlist[i].gateIdOnPathToCircuitOutput.size()<<endl;
+	//computeCoverageRank(); 
 }
-
 
 
 void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bit) {
@@ -243,107 +254,6 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 		if(watch == "NOT"||watch == "not" || watch =="BUF" || watch=="buf") netlist[loc+2].isLocked=true; 
 	}	
 }
-void selectGateLocationRandomly(int& pos){
-    do{
-        pos = rand()%(netlist.size());
-    }while(netlist[pos].isLocked);
-    return;
-}
-
-void selectFirstGateLocationRandomly(int& pos){
-	int numberofgate = originalNetlist.size();
-	int *numofconvergence= new int[numberofgate];
-	int *checkconv = new int[numberofgate];
-	for(int i=0;i<numberofgate;i++){
-		for(int j=0;j<numberofgate;j++){
-			checkconv[j]=0;
-		}
-		numofconvergence[i]=0;
-		checkconv[i]=1;
-		numofconvergence[i] = getConvergence(&originalNetlist[i], checkconv);
-	}
-	
-	pos = 0;
-	int max_conv = numofconvergence[0];
-	for(int i=1;i<numberofgate;i++){
-		if(max_conv<numofconvergence[i]){
-			max_conv = numofconvergence[i];
-			pos = i;
-		}
-	}
-	delete[] numofconvergence;
-	delete[] checkconv;
-}
-
-int getConvergence(Gate *pointtonode,int *checkconv){
-	node_root.clear();
-	traverseinput(pointtonode,checkconv);
-	
-	traverseoutput(pointtonode,checkconv);
-	node_num_convergence=0;
-	for(int i=0;i<node_root.size();i++){
-		traverseinputgetConvergence(node_root[i],checkconv);
-	}
-	node_root.clear();
-	return node_num_convergence;
-}
-void traverseinput(Gate *pointtonode,int *checkconv){
-	if(checkconv[pointtonode->id]!=0) return;
-	checkconv[pointtonode->id]=1;
-	if(pointtonode->inGates.size()!=0){
-		
-		for(int i=0;i<(pointtonode->inGates).size();i++){
-		//cout<< pointtonode->inGates.size()<<endl;			
-				
-			traverseinput(((pointtonode->inGates)[i]),checkconv);
-		}
-	}
-	
-}
-void traverseoutput(Gate *pointtonode,int *checkconv){
-	if(checkconv[pointtonode->id]!=0) return;
-	checkconv[pointtonode->id]=1;
-	if(!(pointtonode->outGates).empty()){
-		
-		for(int i=0;i<(pointtonode->outGates).size();i++){
-			traverseoutput(((pointtonode->outGates)[i]),checkconv);
-		}
-	}
-	else{
-		node_root.push_back(pointtonode);
-	}
-	
-}
-void traverseinputgetConvergence(Gate *pointtonode,int *checkconv){
-	if(checkconv[pointtonode->id]==0){
-		checkconv[pointtonode->id]=1;
-		if(!(pointtonode->inGates).empty()){
-			if((pointtonode->inGates).size()>1){
-				node_num_convergence=node_num_convergence+1;
-			}
-		}
-	}
-	if(!(pointtonode->inGates).empty()){
-		for(int i=0;i<(pointtonode->inGates).size();i++){
-				traverseinputgetConvergence((pointtonode->inGates)[i],checkconv);
-			}
-	}
-}
-
-
-
-
-void findGateWithLargestConvRankAndNotLocked(int& pos){
-	int max=0;
-	for(int i=0;i<originalNetlist.size();i++){
-		if(originalNetlist[i].convergeRank>=max && originalNetlist[i].isLocked==false) {
-			pos = i;
-			max = originalNetlist[i].convergeRank;
-		}
-	}
-	if(max==0) selectGateLocationRandomly(pos);
-	return;
-}
 
 bool findEdgeType(Gate& gate_j, Gate& key_gate_k){
 	
@@ -374,20 +284,68 @@ bool findEdgeType(Gate& gate_j, Gate& key_gate_k){
 	}else return false; 
 
 	
-}// return false when mutable 
+}
+
+
+void selectGateLocationRandomly(int& pos){
+    do{
+        pos = rand()%(netlist.size());
+    }while(netlist[pos].isLocked);
+    return;
+}
+
+void findGateWithLargestConvRankAndNotLocked(int& pos){
+	int max=0;
+	for(int i=0;i<originalNetlist.size();i++){
+		if(originalNetlist[i].convergeRank>=max && originalNetlist[i].isLocked==false) {
+			pos = i;
+			max = originalNetlist[i].convergeRank;
+		}
+	}
+	if(max==0) selectGateLocationRandomly(pos);
+	return;
+}
+
+void computeCoverageRank(){
+	for(int i=0;i<originalNetlist.size();i++){
+		for(int j=0;j<originalNetlist.size();j++){
+			if(i>=j) continue;
+			else if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(j)) continue;
+			else if(originalNetlist[j].gateIdOnPathToCircuitOutput.count(i)) continue;
+
+			set<int>::iterator it; 
+			for(it = originalNetlist[j].gateIdOnPathToCircuitOutput.begin(); it!= originalNetlist[j].gateIdOnPathToCircuitOutput.end(); ++it ){
+				if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(*it)){
+					originalNetlist[i].convergeRank++;
+					break;
+				}
+				
+			}
+				
+		}
+	}
+}
+
+
 bool t; //Ignore;
-void applyStrongLogicLocking(int keySize) {
+
+
+
+void applyStrongLogicLocking(int keySize){ 
 
 	vector<Gate> keyGateLocations = {};
 
 	//Randomly select the location to insert the first key gate.
 	int pos;
-	//selectGateLocationRandomly(pos);
-	//findGateWithLargestConvRankAndNotLocked(pos);
-	selectFirstGateLocationRandomly(pos);
-  
-	addKeyGate(pos, keyGateLocations, 0);
 
+	// This function doesn't work. Therfore use the elder one. Remove the comment can view this problem.
+	//selectFirstGateLocationRandomly(pos); 
+	//cout << pos << " ";
+	findGateWithLargestConvRankAndNotLocked(pos);
+  	//cout << pos << endl;
+
+
+	addKeyGate(pos, keyGateLocations, 0);
 
 	for(int i=1; i < keySize; i++){
 		bool foundNonMutable = false;
@@ -398,8 +356,7 @@ void applyStrongLogicLocking(int keySize) {
 
 				for(int k=0; k<keyGateLocations.size(); k++){
 					
-					// findEdgeType(Gate& gate_j, Gate& key_gate_k) return true when mutable 
-					
+					// findEdgeType return true when mutable 
 					edgeTypes = findEdgeType(netlist[j], keyGateLocations[k]);
 					if(edgeTypes) break;
 						
@@ -414,10 +371,12 @@ void applyStrongLogicLocking(int keySize) {
 		}
 		if( foundNonMutable == false ) {
 			int rpos;
-			//selectGateLocationRandomly(rpos);
-			//findGateWithLargestConvRankAndNotLocked(rpos);
-			selectFirstGateLocationRandomly(pos);
-
+	
+			// This function doesn't work. Therfore use the elder one. Remove the comment can view this problem.
+			//selectFirstGateLocationRandomly(rpos);
+			//cout<< ">>" << rpos << " "; 
+			findGateWithLargestConvRankAndNotLocked(rpos);
+			//cout<< rpos << endl;
 			addKeyGate(rpos,keyGateLocations,i);
 		}
 	}
@@ -461,6 +420,88 @@ int not_buf_counter(){
 	return counter;
 }
 
+void selectFirstGateLocationRandomly(int& pos){
+	int numberofgate = originalNetlist.size();
+	int *numofconvergence= new int[numberofgate];
+	int *checkconv = new int[numberofgate];
+	for(int i=0;i<numberofgate;i++){
+		for(int j=0;j<numberofgate;j++){
+			checkconv[j]=0;
+		}
+		numofconvergence[i]=0;
+		checkconv[i]=1;
+		numofconvergence[i] = getConvergence(&originalNetlist[i], checkconv);
+	}
+	
+	pos = 0;
+	int max_conv = numofconvergence[0];
+	for(int i=1;i<numberofgate;i++){
+		if(max_conv<numofconvergence[i]){
+			max_conv = numofconvergence[i];
+			pos = i;
+		}
+	}
+	delete[] numofconvergence;
+	delete[] checkconv;
+}
+
+int getConvergence(Gate *pointtonode,int *checkconv){
+	node_root.clear();
+	traverseinput(pointtonode,checkconv);
+	
+	traverseoutput(pointtonode,checkconv);
+	node_num_convergence=0;
+	for(int i=0;i<node_root.size();i++){
+		traverseinputgetConvergence(node_root[i],checkconv);
+	}
+	node_root.clear();
+	return node_num_convergence;
+}
+
+void traverseinput(Gate *pointtonode,int *checkconv){
+	if(checkconv[pointtonode->id]!=0) return;
+	checkconv[pointtonode->id]=1;
+	if(pointtonode->inGates.size()!=0){
+		
+		for(int i=0;i<(pointtonode->inGates).size();i++){
+			traverseinput(((pointtonode->inGates)[i]),checkconv);
+		}
+	}
+	
+}
+
+void traverseoutput(Gate *pointtonode,int *checkconv){
+	if(checkconv[pointtonode->id]!=0) return;
+	checkconv[pointtonode->id]=1;
+	if(!(pointtonode->outGates).empty()){
+		
+		for(int i=0;i<(pointtonode->outGates).size();i++){
+			traverseoutput(((pointtonode->outGates)[i]),checkconv);
+		}
+	}
+	else{
+		node_root.push_back(pointtonode);
+	}
+	
+}
+
+void traverseinputgetConvergence(Gate *pointtonode,int *checkconv){
+	if(checkconv[pointtonode->id]==0){
+		checkconv[pointtonode->id]=1;
+		if(!(pointtonode->inGates).empty()){
+			if((pointtonode->inGates).size()>1){
+				node_num_convergence=node_num_convergence+1;
+			}
+		}
+	}
+	if(!(pointtonode->inGates).empty()){
+		for(int i=0;i<(pointtonode->inGates).size();i++){
+				traverseinputgetConvergence((pointtonode->inGates)[i],checkconv);
+			}
+	}
+}
+
+
 int main(int argv, char* argc[]) {
 
 	string filename = argc[1];
@@ -480,3 +521,6 @@ int main(int argv, char* argc[]) {
 	outputLockedCircuit("locked_"+filename, keyString);
 	return 0;
 }
+
+
+
