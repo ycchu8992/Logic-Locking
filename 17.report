@@ -1,0 +1,30 @@
+inputs=5 keys=4 outputs=2 gates=10
+iteration: 1; vars: 70; clauses: 12; decisions: 0
+finished solver loop. fail_count = 0
+key=1110
+iteration=1; backbones_count=0; cube_count=106; cpu_time=0.003188; maxrss=1.53906
+inputs=5 keys=4 outputs=2 gates=10
+iteration: 1; vars: 70; clauses: 12; decisions: 0
+finished solver loop. fail_count = 0
+key=1110
+iteration=1; backbones_count=0; cube_count=106; cpu_time=0.00231; maxrss=1.53906
+inputs=5 keys=4 outputs=2 gates=10
+iteration: 1; vars: 70; clauses: 12; decisions: 0
+finished solver loop. fail_count = 0
+key=1110
+iteration=1; backbones_count=0; cube_count=106; cpu_time=0.002127; maxrss=1.53906
+inputs=5 keys=4 outputs=2 gates=10
+iteration: 1; vars: 70; clauses: 12; decisions: 0
+finished solver loop. fail_count = 0
+key=1110
+iteration=1; backbones_count=0; cube_count=106; cpu_time=0.002287; maxrss=1.53906
+inputs=5 keys=4 outputs=2 gates=10
+iteration: 1; vars: 70; clauses: 12; decisions: 0
+finished solver loop. fail_count = 0
+key=1110
+iteration=1; backbones_count=0; cube_count=106; cpu_time=0.002726; maxrss=1.53906
+inputs=5 keys=4 outputs=2 gates=10
+iteration: 1; vars: 70; clauses: 12; decisions: 0
+finished solver loop. fail_count = 0
+key=1110
+iteration=1; backbones_count=0; cube_count=106; cpu_time=0.001442; maxrss=1.53906

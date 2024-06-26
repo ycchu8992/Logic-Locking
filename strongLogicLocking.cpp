@@ -57,7 +57,6 @@ void outputLockedCircuit(const string& filename, const string& keyString);
 void outputLockedCircuit(const string& filename, const string& keyString);
 void findGateWithLargestConvRankAndNotLocked(int& pos);
 void computeCoverageRank();
-void selectGateLocationRandomly(int& pos);
 
 
 void constructGraph(){
@@ -303,11 +302,11 @@ bool findEdgeType(Gate& gate_j, int key_gate_k){
 			if(outputWireNameToGateId[originalNetlist[*it].inputs.at(k)]<0) isMutable = true;
 		}
 		if(gr.gateIdOnPathToCircuitOutput.count(*it)){
-			convergeAt.push_back(*it);
-//			isConvergent =  true;
+//			convergeAt.push_back(*it);
+			isConvergent =  true;
 //			break;
 		}else{
-//			isConvergent =  false;
+			isConvergent =  false;
 		} 
 	}		
 	//cout<<convergeAt.size()<<endl;
@@ -324,22 +323,9 @@ bool findEdgeType(Gate& gate_j, int key_gate_k){
 	if(!isConvergent) return false;
 	else if(isMutable) return true;
 	else return false;
-	/*
-	if( isDominating ){
-		return true;
-	}else return false; 
-	*/
 	
 }
 
-/*
-void selectGateLocationRandomly(int& pos){
-    do{
-        pos = rand()%(netlist.size());
-    }while(netlist[pos].isLocked); 
-    return;
-}
-*/
 void findGateWithLargestConvRankAndNotLocked(int& pos){
 	int max=-1;
 	vector<int> candidates;
@@ -348,15 +334,17 @@ void findGateWithLargestConvRankAndNotLocked(int& pos){
 		if(originalNetlist[i].isLocked) continue;
 		if( CRK > max ) {
 			pos = i;
-			max = originalNetlist[i].convergeRank;
+			max = CRK;
 			candidates.clear();
 			candidates.push_back(pos);
-		} else if ( CRK == max ) candidates.push_back(i);
+		} else if ( CRK == max ) {
+	//		pos = i;
+			candidates.push_back(i);
+		}
 	}
-	int n = candidates.size();
-	//cout<<"n:"<<n<<endl;
-	if (n>1) pos = candidates.at(rand()%n);
-//	if(max==0) selectGateLocationRandomly(pos);
+	//int n = candidates.size();
+//	cout<<n<<endl;
+	//if (n>1) pos = candidates.at(rand()%n);
 	return;
 }
 
@@ -571,7 +559,7 @@ time_t now = time(0);
 	t = (localtime(&now))->tm_year > 124;
 	srand(now);	
 	// Apply logical lockign on circuit with SLL technique	
-	int keySize = (netlist.size()-outputs.size()-not_buf_counter());
+	int keySize = (netlist.size()-outputs.size()-not_buf_counter())/2;
 	if(keySize>128) keySize=128;
 	if(keySize<4) keySize = 4; 
 	string str = "11101010010001001011111010100100010010111110101001000100101111101010010001001011010111101000101010010100010100100101000010010101";

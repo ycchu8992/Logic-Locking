@@ -10,6 +10,7 @@ runs:
 	./sll.out c17.bench 
 	./sll.out c432.bench 
 	./sll.out c3540.bench 
+
 .PHONY: runr
 runr:
 	./rll.out c17.bench 
@@ -29,6 +30,27 @@ c432_sll:
 .PHONY: c17_sll
 c17_sll: 
 	-sld -N 1 -c10 locked_c17.bench c17.bench 
+
+auto: 17s 432s 3540s
+
+.PHONY: 3540s
+3540s: 
+	@sld -N 1 -c10 locked_c3540.bench c3540.bench >> 3540.report
+	@head -n 1 3540.report
+	@tail -n 1 3540.report
+
+.PHONY: 432s
+432s: 
+	@sld -N 1 -c10 locked_c432.bench c432.bench >> 432.report
+	@head -n 1 432.report
+	@tail -n 1 432.report
+ 
+
+.PHONY: 17s
+17s: 
+	@sld -N 1 -c10 locked_c17.bench c17.bench >> 17.report
+	@head -n 1 17.report
+	@tail -n 1 17.report
 
 .PHONY: lcmp
 lcmp: 
