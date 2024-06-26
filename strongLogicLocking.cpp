@@ -293,8 +293,8 @@ bool findEdgeType(Gate& gate_j, Gate& key_gate_k){
 	bool isDominating = false;
 
 	set<int>::iterator it;
-	for(it = gate_j.gateIdOnPathToCircuitOutput.begin(); it != gate_j.gateIdOnPathToCircuitOutput.end(); ++it){
-		if(key_gate_k.gateIdOnPathToCircuitOutput.count(*it)){
+	for(it = key_gate_k.gateIdOnPathToCircuitOutput.begin(); it != key_gate_k.gateIdOnPathToCircuitOutput.end(); ++it){
+		if(gate_j.gateIdOnPathToCircuitOutput.count(*it)){
 			isConvergent =  true;
 			break;
 		}else{
@@ -403,6 +403,7 @@ void applyStrongLogicLocking(int keySize){
 						
 				}
 				if(!edgeTypes){
+					
 					addKeyGate(j, keyGateLocations, i);
 					foundNonMutable = true;
 					break;
@@ -484,6 +485,8 @@ void selectFirstGateLocationRandomly(int& pos){
 	}
 	delete[] numofconvergence;
 	delete[] checkconv;
+	cout<<pos<<endl;
+	
 }
 
 int getConvergence(Gate *pointtonode,int *checkconv){
