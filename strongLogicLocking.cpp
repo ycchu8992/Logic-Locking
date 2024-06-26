@@ -295,15 +295,16 @@ bool findEdgeType(Gate& gate_j, int key_gate_k){
 	Gate gr = originalNetlist[key_gate_k];
 	bool isConvergent = false;
 	bool isDominating = false;
-
+	bool isMutable = false;
 	vector<int> convergeAt;	
 	set<int>::iterator it;
 	for(it = gt.gateIdOnPathToCircuitOutput.begin(); it != gt.gateIdOnPathToCircuitOutput.end(); ++it){
-//	for(int k =0; k<originalNetlist[*it].inputs.size();k++) if(outputWireNameToGateId[originalNetlist[*it].inputs.at(k)]<0) return true;
-
+		for(int k =0; k<originalNetlist[*it].inputs.size();k++) {
+			if(outputWireNameToGateId[originalNetlist[*it].inputs.at(k)]<0) isMutable = true;
+		}
 		if(gr.gateIdOnPathToCircuitOutput.count(*it)){
-	convergeAt.push_back(*it);
-			isConvergent =  true;
+			convergeAt.push_back(*it);
+//			isConvergent =  true;
 //			break;
 		}else{
 //			isConvergent =  false;
@@ -313,15 +314,21 @@ bool findEdgeType(Gate& gate_j, int key_gate_k){
 	
 	if(gr.gateIdOnPathToCircuitOutput.count(id))  isDominating = true;
 	else isDominating = false; 
+	
+	if( isDominating ){
+		return true;
+	}//else return false; 
 
 
 	//the Gatej is on the path from the keygate to the outputsignal which is potentially mutalbe; therefore return true;
 	if(!isConvergent) return false;
-	
+	else if(isMutable) return true;
+	else return false;
+	/*
 	if( isDominating ){
 		return true;
 	}else return false; 
-
+	*/
 	
 }
 
