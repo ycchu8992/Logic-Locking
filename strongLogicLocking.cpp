@@ -61,25 +61,56 @@ void selectGateLocationRandomly(int& pos);
 
 
 void constructGraph(){
-	// Prepare for searching 
-	
+	// Prepare for searching
+	 
+	vector<int> mark;
 	for(int i = originalNetlist.size()-1; i>=0; i--){
+
+
+		
 		// Find the gate output wire name
-		string wire = originalNetlist[i].output;
+		string wire = originalNetlist.at(i).output;
+		
+		//A iterator of the bench output
 		vector<string>::iterator it;
+
+		//Try to find the fanout wire name in the bench output
 		it = find(outputs.begin(), outputs.end(), wire);
 
-		if( it == outputs.end() ){ 
-			for(int j=0; j<originalNetlist[i].outGates.size();j++){
-				set<int>& nextGate = originalNetlist[i].outGates.at(j)->gateIdOnPathToCircuitOutput;
-				originalNetlist[i].gateIdOnPathToCircuitOutput.insert(nextGate.begin(),nextGate.end());	
-				int id =outputWireNameToGateId[originalNetlist[i].outGates.at(j)->output]; 				
-				originalNetlist[i].gateIdOnPathToCircuitOutput.emplace(id);	
+		//If it stop at the end, the fanout wire name is not in the bench output
+		//That is the examing gate connect to another gates.
+		if( it == outputs.end() ){
+		
+			//Iteration the gates that connect to this gate directly 
+			for(int j=0; j<originalNetlist.at(i).outGates.size();j++){
+				//Fetch the gates-on-path of the connected gate.	
+				set<int>& nextGate = originalNetlist.at(i).outGates.at(j)->gateIdOnPathToCircuitOutput;
+				set<int>& curGate = originalNetlist[i].gateIdOnPathToCircuitOutput;
+				
+				string outwire = originalNetlist[i].outGates.at(j)->output;
+				int id = outputWireNameToGateId[outwire];
+				if(id == -1 ) continue;
+				originalNetlist[i].gateIdOnPathToCircuitOutput.insert(id);				
+				for(auto p:nextGate){
+					if(p==-1) continue;
+					originalNetlist[i].gateIdOnPathToCircuitOutput.insert(p);				
+				}
 			}
+			
+			
+		}else {
+			mark.push_back(i);
+			originalNetlist[i].gateIdOnPathToCircuitOutput.insert(-1);
 		}
 	}
 
+	for(int i=0;i<mark.size();i++){
+		originalNetlist[mark.at(i)].gateIdOnPathToCircuitOutput.clear();	
+	}
+
 	waterMark+="team01"; //Ignore;
+		
+	
 	
 	return;
 }
@@ -98,7 +129,7 @@ void parseBenchFile(const string& filename) {
 
 	// Declare a string variable to store the un-parsed line.
 	string line;
-
+	
 	//Get a line from the file. If no line ( EOF ), the loop ends.
 	while (getline(file, line)) {
 		
@@ -111,19 +142,18 @@ void parseBenchFile(const string& filename) {
 			// Question: there is assumption, the format of bench is INPUT(...) 
 			
 			inputs.push_back(line.substr(6, line.size() - 7));
+			outputWireNameToGateId[line.substr(6, line.size() - 7)] = -1;
+			
 
 		} else if (line.find("OUTPUT")==0) {
-
 			//Lookup the comment of INPUT if neccesary.
 			outputs.push_back(line.substr(7, line.size() - 8));
 			
 		} else {
-		
 			// The bench may or maynot contain an empty string between a Signal declaration and gates.
 			if(line=="\0") continue;	// Skipped when line is empty..
 			
 			//The following statements replace the format sparated by " " which is for the stringstream.
-
 			if( line.find('(') < line.size() ) line.replace( line.find('('), 1, " ");
 			if( line.find(')') < line.size() ) line.replace( line.find(')'), 1, " ");
 			
@@ -149,7 +179,9 @@ void parseBenchFile(const string& filename) {
 				// That is, we can fetch the input wires from the gate structure.
 				gate.inputs.push_back(input);
 			}
-			
+
+			gate.id = curNumOfGate;		
+	
 			//Mark this gate as non keygate.
 			gate.isKeyGate = false;
 
@@ -175,20 +207,15 @@ void parseBenchFile(const string& filename) {
 			// A gate is suceesfully read, update the curNumOfGate. 
 			curNumOfGate=curNumOfGate+1;
 		}
-	}
 
+	}
 
 	//originalNetlist, outputWireNameToGateId (global); 
 	for(int i=0;i<originalNetlist.size();i++){
-		originalNetlist[i].id=i;
 		for(const auto fanInWireName: originalNetlist[i].inputs){
-			int id = outputWireNameToGateId[fanInWireName];
+			/*bool findInputWire = false;
 			
-
-		
-		
-			bool findInputWire = false;
-			for(int j=0; j<originalNetlist[i].inputs.size();j++){
+			for(int j=0; j< originalNetlist[i].inputs.size();j++){
 				vector<string>::iterator it;
 				it = find(inputs.begin(), inputs.end(), originalNetlist[i].inputs.at(j));
 				if( it != inputs.end() ) {
@@ -196,18 +223,21 @@ void parseBenchFile(const string& filename) {
 					break;
 				}	
 			}
-			if(findInputWire) continue;
+			*/
+			int id = outputWireNameToGateId[fanInWireName];
+			if(id==-1) continue; //findInWireName is inputWire 
+			originalNetlist[id].outGates.push_back( & originalNetlist[i] );
 
 			originalNetlist[i].inGates.push_back( & originalNetlist[id] );
-			originalNetlist[id].outGates.push_back( & originalNetlist[i] );
+
+			
 		}
-				
+		
 	}
 	waterMark+="hws11220"; //Ignore;
 
 	constructGraph();
-
-	//computeCoverageRank(); 
+	computeCoverageRank(); 
 }
 
 
@@ -307,16 +337,20 @@ void findGateWithLargestConvRankAndNotLocked(int& pos){
 }
 
 void computeCoverageRank(){
-	for(int i=0;i<originalNetlist.size();i++){
-		for(int j=0;j<originalNetlist.size();j++){
-			if(i>=j) continue;
-			else if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(j)) continue;
-			else if(originalNetlist[j].gateIdOnPathToCircuitOutput.count(i)) continue;
+	//Iterattion on each non key gates.
 
+
+	for(int i=0;i<originalNetlist.size();i++){
+		for(int j=i+1;j<originalNetlist.size();j++){
+			if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(j)) continue;
+			if(originalNetlist[j].gateIdOnPathToCircuitOutput.count(i)) continue;
+
+			
 			set<int>::iterator it; 
 			for(it = originalNetlist[j].gateIdOnPathToCircuitOutput.begin(); it!= originalNetlist[j].gateIdOnPathToCircuitOutput.end(); ++it ){
 				if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(*it)){
 					originalNetlist[i].convergeRank++;
+					originalNetlist[j].convergeRank++;
 					break;
 				}
 				
@@ -324,6 +358,13 @@ void computeCoverageRank(){
 				
 		}
 	}
+//		cout<<originalNetlist[0].convergeRank<<" ";
+//		cout<<originalNetlist[1].convergeRank<<" ";
+//		cout<<originalNetlist[2].convergeRank<<" ";
+//		cout<<originalNetlist[3].convergeRank<<" ";
+//		cout<<originalNetlist[4].convergeRank<<" ";
+//		cout<<originalNetlist[5].convergeRank<<endl;
+	
 }
 
 
