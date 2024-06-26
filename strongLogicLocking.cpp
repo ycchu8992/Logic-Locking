@@ -50,8 +50,8 @@ int not_buf_counter();
 
 void constructGraph();
 void parseBenchFile(const string& filename);
-void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bit);
-bool findEdgeType(Gate& gate_j, Gate& key_gate_k);
+void addKeyGate(const int loc, vector<int>& keyGateLocations, const int& key_bit);
+bool findEdgeType(Gate& gate_j, int key_gate_k);
 void applyStrongLogicLocking(int keySize);
 void outputLockedCircuit(const string& filename, const string& keyString);
 void outputLockedCircuit(const string& filename, const string& keyString);
@@ -225,17 +225,6 @@ void parseBenchFile(const string& filename) {
 	//originalNetlist, outputWireNameToGateId (global); 
 	for(int i=0;i<originalNetlist.size();i++){
 		for(const auto fanInWireName: originalNetlist[i].inputs){
-			/*bool findInputWire = false;
-			
-			for(int j=0; j< originalNetlist[i].inputs.size();j++){
-				vector<string>::iterator it;
-				it = find(inputs.begin(), inputs.end(), originalNetlist[i].inputs.at(j));
-				if( it != inputs.end() ) {
-					findInputWire = true;
-					break;
-				}	
-			}
-			*/
 			int id = outputWireNameToGateId[fanInWireName];
 			if(id==-1) continue; //findInWireName is inputWire 
 			originalNetlist[id].outGates.push_back( & originalNetlist[i] );
@@ -253,7 +242,7 @@ void parseBenchFile(const string& filename) {
 }
 
 
-void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bit) {
+void addKeyGate(const int loc, vector<int>& keyGateLocations, const int& key_bit) {
 	// loc: the location of a gate. The key gate will be insert at its output.
 	// keyGateLocation: a vector which stores the key_gate
 	// key: the name of the input key with the format of k1, k2, ...;
@@ -290,7 +279,7 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 	// The location is the place of the locked gate; therefore the key gate must insert at its next position.
 	netlist.insert(it+loc+1, keyGate);
 
-	keyGateLocations.push_back(keyGate);
+	keyGateLocations.push_back(id);
 	
 	if(outputWireNameToGateId[org_out]!=-2 && originalNetlist[outputWireNameToGateId[org_out]].outGates.size()==1 ){
 		Gate* nextGate = originalNetlist[outputWireNameToGateId[org_out]].outGates.at(0);
@@ -300,28 +289,29 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 	}
 }
 
-bool findEdgeType(Gate& gate_j, Gate& key_gate_k){
+bool findEdgeType(Gate& gate_j, int key_gate_k){
 	int id = outputWireNameToGateId[gate_j.output];
-
+	Gate gt = originalNetlist[id];
+	Gate gr = originalNetlist[key_gate_k];
 	bool isConvergent = false;
 	bool isDominating = false;
 
 	vector<int> convergeAt;	
 	set<int>::iterator it;
-	for(it = gate_j.gateIdOnPathToCircuitOutput.begin(); it != gate_j.gateIdOnPathToCircuitOutput.end(); ++it){
+	for(it = gt.gateIdOnPathToCircuitOutput.begin(); it != gt.gateIdOnPathToCircuitOutput.end(); ++it){
 //	for(int k =0; k<originalNetlist[*it].inputs.size();k++) if(outputWireNameToGateId[originalNetlist[*it].inputs.at(k)]<0) return true;
 
-		if(key_gate_k.gateIdOnPathToCircuitOutput.count(*it)){
-//	convergeAt.push_back(*it);
+		if(gr.gateIdOnPathToCircuitOutput.count(*it)){
+	convergeAt.push_back(*it);
 			isConvergent =  true;
 //			break;
 		}else{
 //			isConvergent =  false;
 		} 
 	}		
-//	cout<<convergeAt.size()<<endl;
+	cout<<convergeAt.size()<<endl;
 	
-	if(key_gate_k.gateIdOnPathToCircuitOutput.count(id))  isDominating = true;
+	if(gr.gateIdOnPathToCircuitOutput.count(id))  isDominating = true;
 	else isDominating = false; 
 
 
@@ -335,14 +325,14 @@ bool findEdgeType(Gate& gate_j, Gate& key_gate_k){
 	
 }
 
-
+/*
 void selectGateLocationRandomly(int& pos){
     do{
         pos = rand()%(netlist.size());
     }while(netlist[pos].isLocked); 
     return;
 }
-
+*/
 void findGateWithLargestConvRankAndNotLocked(int& pos){
 	int max=-1;
 	vector<int> candidates;
@@ -366,7 +356,6 @@ void findGateWithLargestConvRankAndNotLocked(int& pos){
 void computeCoverageRank(){
 	//Iterattion on each non key gates.
 
-	//cout<<"wait..."<<endl;
 	time_t clk = time(0);
 	for(int i=0;i<originalNetlist.size();i++){
 		for(int j=i+1;j<originalNetlist.size();j++){
@@ -386,15 +375,6 @@ void computeCoverageRank(){
 				
 		}
 	}
-	//cout<<"time: "<<time(0)-clk<<"s"<<endl;
-	//cout<<"Complete!"<<endl;
-//		cout<<originalNetlist[0].convergeRank<<" ";
-//		cout<<originalNetlist[1].convergeRank<<" ";
-//		cout<<originalNetlist[2].convergeRank<<" ";
-//		cout<<originalNetlist[3].convergeRank<<" ";
-//		cout<<originalNetlist[4].convergeRank<<" ";
-//		cout<<originalNetlist[5].convergeRank<<endl;
-	
 }
 
 
@@ -404,16 +384,15 @@ bool t; //Ignore;
 
 void applyStrongLogicLocking(int keySize){ 
 
-	vector<Gate> keyGateLocations = {};
+	vector<int> keyGateLocations = {};
 
 	//Randomly select the location to insert the first key gate.
 	int pos;
 
 	// This function doesn't work. Therfore use the elder one. Remove the comment can view this problem.
 	//selectFirstGateLocationRandomly(pos); 
-	//cout << pos << " ";
+
 	findGateWithLargestConvRankAndNotLocked(pos);
-  	cout << pos << endl;
 
 
 	addKeyGate(pos, keyGateLocations, 0);
@@ -428,15 +407,15 @@ void applyStrongLogicLocking(int keySize){
 				for(int k=0; k<keyGateLocations.size(); k++){
 					
 					// findEdgeType return true when mutable 
-					edgeTypes &= findEdgeType(netlist[j], keyGateLocations[k]);
-					//if(edgeTypes) break;
+					edgeTypes = edgeTypes && findEdgeType(netlist[j], keyGateLocations[k]);
+//					if(edgeTypes) break;
 						
 				}
 				if(!edgeTypes){
 					
 					addKeyGate(j, keyGateLocations, i);
 					foundNonMutable = true;
-					//cout<<"Select"<<endl;	
+
 					break;
 				} 
 
@@ -447,13 +426,9 @@ void applyStrongLogicLocking(int keySize){
 	
 			// This function doesn't work. Therfore use the elder one. Remove the comment can view this problem.
 			//selectFirstGateLocationRandomly(rpos);
-			//cout<< ">>" << rpos << " "; 
 			findGateWithLargestConvRankAndNotLocked(rpos);
-		//	cout<<pos<<" ";
 			
-			//cout<< rpos << endl;
 			addKeyGate(rpos,keyGateLocations,i); 
-			//cout<<"RAND"<<endl;
 		}
 	}
 }
