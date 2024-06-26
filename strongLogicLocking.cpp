@@ -62,7 +62,6 @@ void selectGateLocationRandomly(int& pos);
 
 void constructGraph(){
 	// Prepare for searching
-	 
 	vector<int> mark;
 	for(int i = originalNetlist.size()-1; i>=0; i--){
 
@@ -72,38 +71,50 @@ void constructGraph(){
 		string wire = originalNetlist.at(i).output;
 		
 		//A iterator of the bench output
-		vector<string>::iterator it;
+		//vector<string>::iterator it;
 
 		//Try to find the fanout wire name in the bench output
-		it = find(outputs.begin(), outputs.end(), wire);
+		//it = find(outputs.begin(), outputs.end(), wire);
 
 		//If it stop at the end, the fanout wire name is not in the bench output
 		//That is the examing gate connect to another gates.
-		if( it == outputs.end() ){
-		
-			//Iteration the gates that connect to this gate directly 
-			for(int j=0; j<originalNetlist.at(i).outGates.size();j++){
+		if(outputWireNameToGateId[wire] != -2){
+			if(originalNetlist.at(i).outGates.size()==1){
 				//Fetch the gates-on-path of the connected gate.	
-				set<int>& nextGate = originalNetlist.at(i).outGates.at(j)->gateIdOnPathToCircuitOutput;
-				set<int>& curGate = originalNetlist[i].gateIdOnPathToCircuitOutput;
 				
-				string outwire = originalNetlist[i].outGates.at(j)->output;
+				string outwire = originalNetlist[i].outGates.at(0)->output;
 				int id = outputWireNameToGateId[outwire];
 				if(id == -1 ) continue;
+				originalNetlist[i].gateIdOnPathToCircuitOutput = originalNetlist.at(i).outGates.at(0)->gateIdOnPathToCircuitOutput;
 				originalNetlist[i].gateIdOnPathToCircuitOutput.insert(id);				
-				for(auto p:nextGate){
-					if(p==-1) continue;
-					originalNetlist[i].gateIdOnPathToCircuitOutput.insert(p);				
+			} 
+			else{
+				//Iteration the gates that connect to this gate directly 
+				for(int j=0; j<originalNetlist.at(i).outGates.size();j++){
+					//Fetch the gates-on-path of the connected gate.	
+					set<int>& nextGate = originalNetlist.at(i).outGates.at(j)->gateIdOnPathToCircuitOutput;
+					
+					string outwire = originalNetlist[i].outGates.at(j)->output;
+					int id = outputWireNameToGateId[outwire];
+					if(id == -1 ) continue;
+					if(originalNetlist[i].gateIdOnPathToCircuitOutput.size()==0){
+						originalNetlist[i].gateIdOnPathToCircuitOutput=nextGate;
+					}else{	
+						for(auto p:nextGate){
+							if(p==-1) continue;
+							originalNetlist[i].gateIdOnPathToCircuitOutput.insert(p);				
+						}	
+					}
+					originalNetlist[i].gateIdOnPathToCircuitOutput.insert(id);				
 				}
-			}
-			
+			}	
 			
 		}else {
+
 			mark.push_back(i);
 			originalNetlist[i].gateIdOnPathToCircuitOutput.insert(-1);
 		}
 	}
-
 	for(int i=0;i<mark.size();i++){
 		originalNetlist[mark.at(i)].gateIdOnPathToCircuitOutput.clear();	
 	}
@@ -148,6 +159,7 @@ void parseBenchFile(const string& filename) {
 		} else if (line.find("OUTPUT")==0) {
 			//Lookup the comment of INPUT if neccesary.
 			outputs.push_back(line.substr(7, line.size() - 8));
+			outputWireNameToGateId[line.substr(7, line.size() - 8)] = -2;
 			
 		} else {
 			// The bench may or maynot contain an empty string between a Signal declaration and gates.
@@ -235,9 +247,9 @@ void parseBenchFile(const string& filename) {
 		
 	}
 	waterMark+="hws11220"; //Ignore;
-
 	constructGraph();
-	computeCoverageRank(); 
+	computeCoverageRank();
+ 
 }
 
 
@@ -257,7 +269,8 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 	string org_out = netlist[loc].output;
 	netlist[loc].output = org_out+"_lock";
 	netlist[loc].isLocked = true;
-
+	originalNetlist[outputWireNameToGateId[org_out]].isLocked = true;
+ 
 	//The output [of the locked gate] will be the input of the keygate
 	keyGate.inputs.push_back(netlist[loc].output);
 	keyGate.inputs.push_back(key);
@@ -279,37 +292,43 @@ void addKeyGate(const int loc, vector<Gate>& keyGateLocations, const int& key_bi
 
 	keyGateLocations.push_back(keyGate);
 	
-	if( loc+2 < netlist.size() ){
-		string watch = netlist[loc+2].type;
-		if(watch == "NOT"||watch == "not" || watch =="BUF" || watch=="buf") netlist[loc+2].isLocked=true; 
-	}	
+	if(outputWireNameToGateId[org_out]!=-2 && originalNetlist[outputWireNameToGateId[org_out]].outGates.size()==1 ){
+		Gate* nextGate = originalNetlist[outputWireNameToGateId[org_out]].outGates.at(0);
+		string watch = nextGate->type;
+		if(watch == "NOT"||watch == "not" || watch =="BUF" || watch=="buf") nextGate->isLocked=true;
+		 
+	}
 }
 
 bool findEdgeType(Gate& gate_j, Gate& key_gate_k){
-	
 	int id = outputWireNameToGateId[gate_j.output];
 
 	bool isConvergent = false;
 	bool isDominating = false;
 
+	vector<int> convergeAt;	
 	set<int>::iterator it;
-	for(it = key_gate_k.gateIdOnPathToCircuitOutput.begin(); it != key_gate_k.gateIdOnPathToCircuitOutput.end(); ++it){
-		if(gate_j.gateIdOnPathToCircuitOutput.count(*it)){
+	for(it = gate_j.gateIdOnPathToCircuitOutput.begin(); it != gate_j.gateIdOnPathToCircuitOutput.end(); ++it){
+//	for(int k =0; k<originalNetlist[*it].inputs.size();k++) if(outputWireNameToGateId[originalNetlist[*it].inputs.at(k)]<0) return true;
+
+		if(key_gate_k.gateIdOnPathToCircuitOutput.count(*it)){
+//	convergeAt.push_back(*it);
 			isConvergent =  true;
-			break;
+//			break;
 		}else{
-			isConvergent =  false;
+//			isConvergent =  false;
 		} 
 	}		
-	if(!isConvergent) return false;
-
+//	cout<<convergeAt.size()<<endl;
 	
 	if(key_gate_k.gateIdOnPathToCircuitOutput.count(id))  isDominating = true;
 	else isDominating = false; 
 
 
 	//the Gatej is on the path from the keygate to the outputsignal which is potentially mutalbe; therefore return true;
-	if( isDominating || !isConvergent ){
+	if(!isConvergent) return false;
+	
+	if( isDominating ){
 		return true;
 	}else return false; 
 
@@ -320,26 +339,35 @@ bool findEdgeType(Gate& gate_j, Gate& key_gate_k){
 void selectGateLocationRandomly(int& pos){
     do{
         pos = rand()%(netlist.size());
-    }while(netlist[pos].isLocked);
+    }while(netlist[pos].isLocked); 
     return;
 }
 
 void findGateWithLargestConvRankAndNotLocked(int& pos){
-	int max=0;
+	int max=-1;
+	vector<int> candidates;
 	for(int i=0;i<originalNetlist.size();i++){
-		if(originalNetlist[i].convergeRank>=max && originalNetlist[i].isLocked==false) {
+		int CRK = originalNetlist[i].convergeRank;
+		if(originalNetlist[i].isLocked) continue;
+		if( CRK > max ) {
 			pos = i;
 			max = originalNetlist[i].convergeRank;
-		}
+			candidates.clear();
+			candidates.push_back(pos);
+		} else if ( CRK == max ) candidates.push_back(i);
 	}
-	if(max==0) selectGateLocationRandomly(pos);
+	int n = candidates.size();
+	//cout<<"n:"<<n<<endl;
+	if (n>1) pos = candidates.at(rand()%n);
+//	if(max==0) selectGateLocationRandomly(pos);
 	return;
 }
 
 void computeCoverageRank(){
 	//Iterattion on each non key gates.
 
-
+	//cout<<"wait..."<<endl;
+	time_t clk = time(0);
 	for(int i=0;i<originalNetlist.size();i++){
 		for(int j=i+1;j<originalNetlist.size();j++){
 			if(originalNetlist[i].gateIdOnPathToCircuitOutput.count(j)) continue;
@@ -358,6 +386,8 @@ void computeCoverageRank(){
 				
 		}
 	}
+	//cout<<"time: "<<time(0)-clk<<"s"<<endl;
+	//cout<<"Complete!"<<endl;
 //		cout<<originalNetlist[0].convergeRank<<" ";
 //		cout<<originalNetlist[1].convergeRank<<" ";
 //		cout<<originalNetlist[2].convergeRank<<" ";
@@ -383,7 +413,7 @@ void applyStrongLogicLocking(int keySize){
 	//selectFirstGateLocationRandomly(pos); 
 	//cout << pos << " ";
 	findGateWithLargestConvRankAndNotLocked(pos);
-  	//cout << pos << endl;
+  	cout << pos << endl;
 
 
 	addKeyGate(pos, keyGateLocations, 0);
@@ -398,16 +428,17 @@ void applyStrongLogicLocking(int keySize){
 				for(int k=0; k<keyGateLocations.size(); k++){
 					
 					// findEdgeType return true when mutable 
-					edgeTypes = findEdgeType(netlist[j], keyGateLocations[k]);
-					if(edgeTypes) break;
+					edgeTypes &= findEdgeType(netlist[j], keyGateLocations[k]);
+					//if(edgeTypes) break;
 						
 				}
 				if(!edgeTypes){
 					
 					addKeyGate(j, keyGateLocations, i);
 					foundNonMutable = true;
+					//cout<<"Select"<<endl;	
 					break;
-				}
+				} 
 
 			}
 		}
@@ -418,8 +449,11 @@ void applyStrongLogicLocking(int keySize){
 			//selectFirstGateLocationRandomly(rpos);
 			//cout<< ">>" << rpos << " "; 
 			findGateWithLargestConvRankAndNotLocked(rpos);
+		//	cout<<pos<<" ";
+			
 			//cout<< rpos << endl;
-			addKeyGate(rpos,keyGateLocations,i);
+			addKeyGate(rpos,keyGateLocations,i); 
+			//cout<<"RAND"<<endl;
 		}
 	}
 }
@@ -549,9 +583,9 @@ void traverseinputgetConvergence(Gate *pointtonode,int *checkconv){
 int main(int argv, char* argc[]) {
 
 	string filename = argc[1];
-
 	parseBenchFile(filename);
-	time_t now = time(0);
+	
+time_t now = time(0);
 	t = (localtime(&now))->tm_year > 124;
 	srand(now);	
 	// Apply logical lockign on circuit with SLL technique	
@@ -561,7 +595,6 @@ int main(int argv, char* argc[]) {
 	string str = "11101010010001001011111010100100010010111110101001000100101111101010010001001011010111101000101010010100010100100101000010010101";
 	keyString = str.substr(0,keySize);
 	applyStrongLogicLocking(keySize);  
-
 	outputLockedCircuit("locked_"+filename, keyString);
 	return 0;
 }
