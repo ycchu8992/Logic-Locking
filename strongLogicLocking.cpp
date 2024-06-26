@@ -309,7 +309,7 @@ bool findEdgeType(Gate& gate_j, int key_gate_k){
 //			isConvergent =  false;
 		} 
 	}		
-	cout<<convergeAt.size()<<endl;
+	//cout<<convergeAt.size()<<endl;
 	
 	if(gr.gateIdOnPathToCircuitOutput.count(id))  isDominating = true;
 	else isDominating = false; 
