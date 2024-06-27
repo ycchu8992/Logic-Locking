@@ -59,9 +59,11 @@ void insert_key_gate(vector<Gate> &gates, vector<string> &inputs, const string &
 
 int main(int argc, char *argv[]) {
     string bench_name = argv[1];
+    string bench_name_postfix = "";
     if (argc == 3) {
-        bench_name = bench_name + "_" + (string)argv[2];
+        bench_name_postfix = "_" + (string)argv[2];
     }
+
     string file_path = "bench/" + bench_name + ".bench";
     vector<string> inputs;
     vector<string> outputs;
@@ -186,7 +188,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Generate new bench file
-    ofstream new_file("bench/fall_" + bench_name + ".bench");
+    ofstream new_file("bench/fall_" + bench_name + bench_name_postfix + ".bench");
+
     for (const auto &input : inputs) {
         new_file << "INPUT(" << input << ")\n";
     }
