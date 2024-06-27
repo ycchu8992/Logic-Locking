@@ -1,0 +1,43 @@
+# Benchmark "fall_c17" written by ABC on Wed Jun 26 08:49:02 2024
+.model fall_c17
+.inputs G1gat G2gat G3gat G6gat G7gat key0 key1 key2 key3 key4 key5
+.outputs G22gat G23gat
+.names G1gat G3gat n13
+11 0
+.names n13 key4 n14
+11 1
+00 1
+.names n14 n15
+0 1
+.names G3gat G6gat n16
+11 0
+.names n16 key3 n17
+01 1
+10 1
+.names n17 n18
+0 1
+.names G2gat n18 n19
+11 0
+.names n19 key0 n20
+01 1
+10 1
+.names n18 G7gat n21
+11 0
+.names n21 key5 n22
+01 1
+10 1
+.names n22 n23
+0 1
+.names n15 n20 n24
+11 0
+.names n24 key2 G22gat
+11 1
+00 1
+.names n20 n23 n26
+11 0
+.names n26 key1 n27
+01 1
+10 1
+.names n27 G23gat
+0 1
+.end

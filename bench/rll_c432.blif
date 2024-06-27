@@ -1,0 +1,881 @@
+# Benchmark "rll_c432" written by ABC on Tue Jun 25 23:34:02 2024
+.model rll_c432
+.inputs G1gat G4gat G8gat G11gat G14gat G17gat G21gat G24gat G27gat G30gat \
+ G34gat G37gat G40gat G43gat G47gat G50gat G53gat G56gat G60gat G63gat \
+ G66gat G69gat G73gat G76gat G79gat G82gat G86gat G89gat G92gat G95gat \
+ G99gat G102gat G105gat G108gat G112gat G115gat keyinput0 keyinput1 \
+ keyinput2 keyinput3 keyinput4 keyinput5 keyinput6 keyinput7 keyinput8 \
+ keyinput9 keyinput10 keyinput11 keyinput12 keyinput13 keyinput14 \
+ keyinput15 keyinput16 keyinput17 keyinput18 keyinput19 keyinput20 \
+ keyinput21 keyinput22 keyinput23 keyinput24 keyinput25 keyinput26 \
+ keyinput27 keyinput28 keyinput29 keyinput30 keyinput31 keyinput32 \
+ keyinput33 keyinput34 keyinput35 keyinput36 keyinput37 keyinput38 \
+ keyinput39 keyinput40 keyinput41 keyinput42 keyinput43 keyinput44 \
+ keyinput45 keyinput46 keyinput47 keyinput48 keyinput49 keyinput50 \
+ keyinput51 keyinput52 keyinput53 keyinput54 keyinput55 keyinput56 \
+ keyinput57 keyinput58 keyinput59 keyinput60 keyinput61 keyinput62 \
+ keyinput63 keyinput64 keyinput65 keyinput66 keyinput67 keyinput68 \
+ keyinput69 keyinput70 keyinput71 keyinput72 keyinput73 keyinput74 \
+ keyinput75 keyinput76 keyinput77 keyinput78 keyinput79 keyinput80 \
+ keyinput81 keyinput82 keyinput83 keyinput84 keyinput85 keyinput86 \
+ keyinput87 keyinput88 keyinput89 keyinput90 keyinput91 keyinput92 \
+ keyinput93 keyinput94 keyinput95 keyinput96 keyinput97 keyinput98 \
+ keyinput99 keyinput100 keyinput101 keyinput102 keyinput103 keyinput104 \
+ keyinput105 keyinput106 keyinput107 keyinput108 keyinput109 keyinput110 \
+ keyinput111 keyinput112 keyinput113 keyinput114 keyinput115 keyinput116 \
+ keyinput117 keyinput118 keyinput119 keyinput120 keyinput121 keyinput122 \
+ keyinput123 keyinput124 keyinput125 keyinput126 keyinput127
+.outputs G223gat G329gat G370gat G421gat G430gat G431gat G432gat
+.names G1gat n171
+0 1
+.names n171 keyinput116 n172
+01 1
+10 1
+.names n172 n173
+0 1
+.names G4gat n174
+0 1
+.names n174 keyinput60 n175
+01 1
+10 1
+.names n175 n176
+0 1
+.names G11gat n177
+0 1
+.names G17gat n178
+0 1
+.names n178 keyinput79 n179
+01 1
+10 1
+.names G24gat n180
+0 1
+.names n180 keyinput65 n181
+01 1
+10 1
+.names n181 n182
+0 1
+.names G30gat n183
+0 1
+.names n183 keyinput18 n184
+01 1
+10 1
+.names G37gat n185
+0 1
+.names G43gat n186
+0 1
+.names n186 keyinput117 n187
+01 1
+10 1
+.names n187 n188
+0 1
+.names G50gat n189
+0 1
+.names G56gat n190
+0 1
+.names n190 keyinput54 n191
+01 1
+10 1
+.names G63gat n192
+0 1
+.names G69gat n193
+0 1
+.names n193 keyinput58 n194
+01 1
+10 1
+.names G76gat n195
+0 1
+.names G82gat n196
+0 1
+.names n196 keyinput91 n197
+01 1
+10 1
+.names G89gat n198
+0 1
+.names n198 keyinput13 n199
+01 1
+10 1
+.names n199 n200
+0 1
+.names G95gat n201
+0 1
+.names G102gat n202
+0 1
+.names n202 keyinput3 n203
+01 1
+10 1
+.names n203 n204
+0 1
+.names G108gat n205
+0 1
+.names n173 G4gat n206
+11 0
+.names n206 keyinput67 n207
+01 1
+10 1
+.names n207 n208
+0 1
+.names G8gat n176 n209
+00 1
+.names n209 keyinput126 n210
+01 1
+10 1
+.names n210 n211
+0 1
+.names G14gat n176 n212
+00 1
+.names n212 keyinput104 n213
+01 1
+10 1
+.names n213 n214
+0 1
+.names n177 G17gat n215
+11 0
+.names n215 keyinput110 n216
+01 1
+10 1
+.names n182 G30gat n217
+11 0
+.names n217 keyinput32 n218
+01 1
+10 1
+.names n185 G43gat n219
+11 0
+.names n219 keyinput2 n220
+01 1
+10 1
+.names n220 n221
+0 1
+.names n189 G56gat n222
+11 0
+.names n222 keyinput23 n223
+01 1
+10 1
+.names n223 n224
+0 1
+.names n192 G69gat n225
+11 0
+.names n195 G82gat n226
+11 0
+.names n226 keyinput73 n227
+01 1
+10 1
+.names n227 n228
+0 1
+.names n200 G95gat n229
+11 0
+.names n229 keyinput30 n230
+01 1
+10 1
+.names n230 n231
+0 1
+.names n204 G108gat n232
+11 0
+.names n232 keyinput59 n233
+01 1
+10 1
+.names n233 n234
+0 1
+.names G21gat n179 n235
+00 1
+.names n235 keyinput39 n236
+01 1
+10 1
+.names G27gat n179 n237
+00 1
+.names G34gat n184 n238
+00 1
+.names n238 keyinput52 n239
+01 1
+10 1
+.names n239 n240
+0 1
+.names G40gat n184 n241
+00 1
+.names n241 keyinput27 n242
+01 1
+10 1
+.names n242 n243
+0 1
+.names G47gat n188 n244
+00 1
+.names G53gat n188 n245
+00 1
+.names n245 keyinput47 n246
+01 1
+10 1
+.names G60gat n191 n247
+00 1
+.names n247 keyinput11 n248
+01 1
+10 1
+.names n248 n249
+0 1
+.names G66gat n191 n250
+00 1
+.names G73gat n194 n251
+00 1
+.names n251 keyinput31 n252
+01 1
+10 1
+.names G79gat n194 n253
+00 1
+.names n253 keyinput57 n254
+01 1
+10 1
+.names G86gat n197 n255
+00 1
+.names n255 keyinput51 n256
+01 1
+10 1
+.names G92gat n197 n257
+00 1
+.names n257 keyinput96 n258
+01 1
+10 1
+.names G99gat n201 n259
+00 1
+.names G105gat n201 n260
+00 1
+.names n260 keyinput86 n261
+01 1
+10 1
+.names n261 n262
+0 1
+.names G112gat n205 n263
+00 1
+.names n263 keyinput83 n264
+01 1
+10 1
+.names G115gat n205 n265
+00 1
+.names n265 keyinput26 n266
+01 1
+10 1
+.names n208 n216 n218 n221 n224 n225 n228 n231 n234 n267
+111111111 1
+.names n267 keyinput33 n268
+01 1
+10 1
+.names n268 n269
+0 1
+.names n268 n270
+0 1
+.names n270 keyinput120 n271
+01 1
+10 1
+.names n268 n272
+0 1
+.names n272 keyinput101 G223gat
+01 1
+10 1
+.names n269 n208 n274
+01 1
+10 1
+.names n269 n216 n275
+01 1
+10 1
+.names n275 keyinput74 n276
+01 1
+10 1
+.names n269 n218 n277
+01 1
+10 1
+.names n277 keyinput121 n278
+01 1
+10 1
+.names n278 n279
+0 1
+.names n269 n221 n280
+01 1
+10 1
+.names n269 n224 n281
+01 1
+10 1
+.names n281 keyinput114 n282
+01 1
+10 1
+.names n269 n225 n283
+01 1
+10 1
+.names n283 keyinput25 n284
+01 1
+10 1
+.names G1gat n271 n285
+11 0
+.names n285 keyinput112 n286
+01 1
+10 1
+.names n286 n287
+0 1
+.names n269 n228 n288
+01 1
+10 1
+.names n288 keyinput34 n289
+01 1
+10 1
+.names n289 n290
+0 1
+.names n271 G11gat n291
+11 0
+.names n291 keyinput28 n292
+01 1
+10 1
+.names n292 n293
+0 1
+.names n269 n231 n294
+01 1
+10 1
+.names n294 keyinput49 n295
+01 1
+10 1
+.names n271 G24gat n296
+11 0
+.names n296 keyinput55 n297
+01 1
+10 1
+.names n297 n298
+0 1
+.names n269 n234 n299
+01 1
+10 1
+.names n299 keyinput17 n300
+01 1
+10 1
+.names n271 G37gat n301
+11 0
+.names n301 keyinput119 n302
+01 1
+10 1
+.names n302 n303
+0 1
+.names n271 G50gat n304
+11 0
+.names n304 keyinput80 n305
+01 1
+10 1
+.names n305 n306
+0 1
+.names n271 G63gat n307
+11 0
+.names n307 keyinput111 n308
+01 1
+10 1
+.names n271 G76gat n309
+11 0
+.names n309 keyinput118 n310
+01 1
+10 1
+.names n271 G89gat n311
+11 0
+.names n271 G102gat n312
+11 0
+.names n274 n211 n313
+11 0
+.names n313 keyinput1 n314
+01 1
+10 1
+.names n274 n214 n315
+11 0
+.names n315 keyinput35 n316
+01 1
+10 1
+.names n316 n317
+0 1
+.names n276 n236 n318
+11 0
+.names n318 keyinput0 n319
+01 1
+10 1
+.names n319 n320
+0 1
+.names n279 n240 n321
+11 0
+.names n321 keyinput89 n322
+01 1
+10 1
+.names n322 n323
+0 1
+.names n280 n244 n324
+11 0
+.names n324 keyinput88 n325
+01 1
+10 1
+.names n282 n249 n326
+11 0
+.names n284 n252 n327
+11 0
+.names n290 n256 n328
+11 0
+.names n328 keyinput108 n329
+01 1
+10 1
+.names n329 n330
+0 1
+.names n295 n259 n331
+11 0
+.names n331 keyinput85 n332
+01 1
+10 1
+.names n300 n264 n333
+11 0
+.names n333 keyinput50 n334
+01 1
+10 1
+.names n334 n335
+0 1
+.names n276 n237 n336
+11 0
+.names n336 keyinput45 n337
+01 1
+10 1
+.names n337 n338
+0 1
+.names n279 n243 n339
+11 0
+.names n339 keyinput24 n340
+01 1
+10 1
+.names n280 n246 n341
+11 0
+.names n341 keyinput14 n342
+01 1
+10 1
+.names n342 n343
+0 1
+.names n282 n250 n344
+11 0
+.names n344 keyinput6 n345
+01 1
+10 1
+.names n284 n254 n346
+11 0
+.names n346 keyinput15 n347
+01 1
+10 1
+.names n290 n258 n348
+11 0
+.names n348 keyinput12 n349
+01 1
+10 1
+.names n295 n262 n350
+11 0
+.names n350 keyinput70 n351
+01 1
+10 1
+.names n300 n266 n352
+11 0
+.names n352 keyinput16 n353
+01 1
+10 1
+.names n314 n320 n323 n325 n326 n327 n330 n332 n335 n354
+111111111 1
+.names n354 keyinput127 n355
+01 1
+10 1
+.names n355 n356
+0 1
+.names n317 n357
+0 1
+.names n357 keyinput38 n358
+01 1
+10 1
+.names n358 n359
+0 1
+.names n338 n360
+0 1
+.names n340 n361
+0 1
+.names n361 keyinput61 n362
+01 1
+10 1
+.names n362 n363
+0 1
+.names n343 n364
+0 1
+.names n364 keyinput5 n365
+01 1
+10 1
+.names n365 n366
+0 1
+.names n345 n367
+0 1
+.names n347 n368
+0 1
+.names n368 keyinput22 n369
+01 1
+10 1
+.names n369 n370
+0 1
+.names n349 n371
+0 1
+.names n351 n372
+0 1
+.names n372 keyinput66 n373
+01 1
+10 1
+.names n353 n374
+0 1
+.names n356 n375
+0 1
+.names n375 keyinput82 n376
+01 1
+10 1
+.names n356 n377
+0 1
+.names n377 keyinput7 n378
+01 1
+10 1
+.names n356 G329gat
+0 1
+.names n376 n314 n380
+01 1
+10 1
+.names n380 keyinput69 n381
+01 1
+10 1
+.names n381 n382
+0 1
+.names n376 n320 n383
+01 1
+10 1
+.names n383 keyinput107 n384
+01 1
+10 1
+.names n376 n323 n385
+01 1
+10 1
+.names n385 keyinput37 n386
+01 1
+10 1
+.names n376 n325 n387
+01 1
+10 1
+.names n387 keyinput19 n388
+01 1
+10 1
+.names G8gat n378 n389
+11 0
+.names n389 keyinput29 n390
+01 1
+10 1
+.names n390 n391
+0 1
+.names n376 n326 n392
+01 1
+10 1
+.names n392 keyinput41 n393
+01 1
+10 1
+.names n393 n394
+0 1
+.names n378 G21gat n395
+11 0
+.names n395 keyinput44 n396
+01 1
+10 1
+.names n376 n327 n397
+01 1
+10 1
+.names n397 keyinput95 n398
+01 1
+10 1
+.names n378 G34gat n399
+11 0
+.names n399 keyinput76 n400
+01 1
+10 1
+.names n376 n330 n401
+01 1
+10 1
+.names n401 keyinput63 n402
+01 1
+10 1
+.names n402 n403
+0 1
+.names n378 G47gat n404
+11 0
+.names n404 keyinput64 n405
+01 1
+10 1
+.names n376 n332 n406
+01 1
+10 1
+.names n378 G60gat n407
+11 0
+.names n407 keyinput21 n408
+01 1
+10 1
+.names n376 n335 n409
+01 1
+10 1
+.names n409 keyinput106 n410
+01 1
+10 1
+.names n410 n411
+0 1
+.names n378 G73gat n412
+11 0
+.names n412 keyinput92 n413
+01 1
+10 1
+.names n378 G86gat n414
+11 0
+.names n414 keyinput75 n415
+01 1
+10 1
+.names n415 n416
+0 1
+.names n378 G99gat n417
+11 0
+.names n417 keyinput93 n418
+01 1
+10 1
+.names n378 G112gat n419
+11 0
+.names n419 keyinput84 n420
+01 1
+10 1
+.names n382 n359 n421
+11 0
+.names n421 keyinput77 n422
+01 1
+10 1
+.names n384 n360 n423
+11 0
+.names n423 keyinput90 n424
+01 1
+10 1
+.names n386 n363 n425
+11 0
+.names n425 keyinput81 n426
+01 1
+10 1
+.names n388 n366 n427
+11 0
+.names n427 keyinput97 n428
+01 1
+10 1
+.names n394 n367 n429
+11 0
+.names n429 keyinput10 n430
+01 1
+10 1
+.names n398 n370 n431
+11 0
+.names n431 keyinput46 n432
+01 1
+10 1
+.names n403 n371 n433
+11 0
+.names n433 keyinput98 n434
+01 1
+10 1
+.names n406 n373 n435
+11 0
+.names n411 n374 n436
+11 0
+.names n436 keyinput109 n437
+01 1
+10 1
+.names n422 n424 n426 n428 n430 n432 n434 n435 n437 n438
+111111111 1
+.names n438 keyinput115 n439
+01 1
+10 1
+.names n439 n440
+0 1
+.names n440 n441
+0 1
+.names n440 n442
+0 1
+.names n442 keyinput43 n443
+01 1
+10 1
+.names n443 G370gat
+0 1
+.names G14gat n441 n445
+11 0
+.names n445 keyinput99 n446
+01 1
+10 1
+.names n446 n447
+0 1
+.names n441 G27gat n448
+11 0
+.names n441 G40gat n449
+11 0
+.names n449 keyinput100 n450
+01 1
+10 1
+.names n450 n451
+0 1
+.names n441 G53gat n452
+11 0
+.names n452 keyinput113 n453
+01 1
+10 1
+.names n441 G66gat n454
+11 0
+.names n454 keyinput72 n455
+01 1
+10 1
+.names n441 G79gat n456
+11 0
+.names n456 keyinput9 n457
+01 1
+10 1
+.names n457 n458
+0 1
+.names n441 G92gat n459
+11 0
+.names n459 keyinput8 n460
+01 1
+10 1
+.names n460 n461
+0 1
+.names n441 G105gat n462
+11 0
+.names n462 keyinput78 n463
+01 1
+10 1
+.names n463 n464
+0 1
+.names n441 G115gat n465
+11 0
+.names G4gat n287 n391 n447 n466
+1111 0
+.names n466 keyinput40 n467
+01 1
+10 1
+.names n467 n468
+0 1
+.names n293 n396 n448 G17gat n469
+1111 0
+.names n469 keyinput87 n470
+01 1
+10 1
+.names n470 n471
+0 1
+.names n298 n400 n451 G30gat n472
+1111 0
+.names n472 keyinput105 n473
+01 1
+10 1
+.names n473 n474
+0 1
+.names n303 n405 n453 G43gat n475
+1111 0
+.names n475 keyinput56 n476
+01 1
+10 1
+.names n306 n408 n455 G56gat n477
+1111 0
+.names n477 keyinput124 n478
+01 1
+10 1
+.names n478 n479
+0 1
+.names n308 n413 n458 G69gat n480
+1111 0
+.names n480 keyinput4 n481
+01 1
+10 1
+.names n481 n482
+0 1
+.names n310 n416 n461 G82gat n483
+1111 0
+.names n483 keyinput125 n484
+01 1
+10 1
+.names n484 n485
+0 1
+.names n311 n418 n464 G95gat n486
+1111 0
+.names n486 keyinput123 n487
+01 1
+10 1
+.names n487 n488
+0 1
+.names n312 n420 n465 G108gat n489
+1111 0
+.names n489 keyinput122 n490
+01 1
+10 1
+.names n490 n491
+0 1
+.names n468 n492
+0 1
+.names n492 keyinput94 n493
+01 1
+10 1
+.names n493 n494
+0 1
+.names n471 n474 n476 n479 n482 n485 n488 n491 n495
+11111111 1
+.names n495 keyinput48 n496
+01 1
+10 1
+.names n496 n497
+0 1
+.names n476 n498
+0 1
+.names n482 n499
+0 1
+.names n499 keyinput42 n500
+01 1
+10 1
+.names n500 n501
+0 1
+.names n485 n502
+0 1
+.names n488 n503
+0 1
+.names n503 keyinput53 n504
+01 1
+10 1
+.names n494 n497 n505
+00 1
+.names n505 keyinput62 G421gat
+01 1
+10 1
+.names n474 n498 n507
+11 0
+.names n507 keyinput36 n508
+01 1
+10 1
+.names n508 n509
+0 1
+.names n474 n476 n501 n479 n510
+1111 0
+.names n510 keyinput102 n511
+01 1
+10 1
+.names n479 n476 n502 n512
+111 0
+.names n512 keyinput68 n513
+01 1
+10 1
+.names n513 n514
+0 1
+.names n474 n476 n485 n504 n515
+1111 0
+.names n515 keyinput103 n516
+01 1
+10 1
+.names n471 n474 n509 n479 n517
+1111 0
+.names n517 keyinput71 n518
+01 1
+10 1
+.names n518 G430gat
+0 1
+.names n471 n474 n511 n514 n520
+1111 0
+.names n520 keyinput20 n521
+01 1
+10 1
+.names n521 G431gat
+0 1
+.names n471 n509 n511 n516 G432gat
+1111 0
+.end

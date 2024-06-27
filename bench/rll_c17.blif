@@ -1,0 +1,36 @@
+# Benchmark "rll_c17" written by ABC on Tue Jun 25 23:31:53 2024
+.model rll_c17
+.inputs G1gat G2gat G3gat G6gat G7gat keyinput0 keyinput1 keyinput2 \
+ keyinput3
+.outputs G22gat G23gat
+.names G1gat G3gat n11
+11 0
+.names G3gat G6gat n12
+11 0
+.names n12 keyinput2 n13
+01 1
+10 1
+.names n13 n14
+0 1
+.names G2gat n14 n15
+11 0
+.names n15 keyinput1 n16
+01 1
+10 1
+.names n14 G7gat n17
+11 0
+.names n11 n16 n18
+11 0
+.names n18 keyinput3 n19
+01 1
+10 1
+.names n19 G22gat
+0 1
+.names n16 n17 n21
+11 0
+.names n21 keyinput0 n22
+01 1
+10 1
+.names n22 G23gat
+0 1
+.end

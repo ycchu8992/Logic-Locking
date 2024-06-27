@@ -1,0 +1,217 @@
+{
+  "creator": "Yosys 0.42+15 (git sha1 74a1dd99a, x86_64-w64-mingw32-g++ 13.2.1 -Os)",
+  "modules": {
+    "c17": {
+      "attributes": {
+      },
+      "ports": {
+        "G1gat": {
+          "direction": "input",
+          "bits": [ 2 ]
+        },
+        "G2gat": {
+          "direction": "input",
+          "bits": [ 3 ]
+        },
+        "G3gat": {
+          "direction": "input",
+          "bits": [ 4 ]
+        },
+        "G6gat": {
+          "direction": "input",
+          "bits": [ 5 ]
+        },
+        "G7gat": {
+          "direction": "input",
+          "bits": [ 6 ]
+        },
+        "G22gat": {
+          "direction": "output",
+          "bits": [ 7 ]
+        },
+        "G23gat": {
+          "direction": "output",
+          "bits": [ 8 ]
+        }
+      },
+      "cells": {
+        "$auto$blifparse.cc:535:parse_blif$1": {
+          "hide_name": 1,
+          "type": "$lut",
+          "parameters": {
+            "LUT": "0111",
+            "WIDTH": "00000000000000000000000000000010"
+          },
+          "attributes": {
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 2, 4 ],
+            "Y": [ 9 ]
+          }
+        },
+        "$auto$blifparse.cc:535:parse_blif$2": {
+          "hide_name": 1,
+          "type": "$lut",
+          "parameters": {
+            "LUT": "0111",
+            "WIDTH": "00000000000000000000000000000010"
+          },
+          "attributes": {
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 4, 5 ],
+            "Y": [ 10 ]
+          }
+        },
+        "$auto$blifparse.cc:535:parse_blif$3": {
+          "hide_name": 1,
+          "type": "$lut",
+          "parameters": {
+            "LUT": "0111",
+            "WIDTH": "00000000000000000000000000000010"
+          },
+          "attributes": {
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 3, 10 ],
+            "Y": [ 11 ]
+          }
+        },
+        "$auto$blifparse.cc:535:parse_blif$4": {
+          "hide_name": 1,
+          "type": "$lut",
+          "parameters": {
+            "LUT": "0111",
+            "WIDTH": "00000000000000000000000000000010"
+          },
+          "attributes": {
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 10, 6 ],
+            "Y": [ 12 ]
+          }
+        },
+        "$auto$blifparse.cc:535:parse_blif$5": {
+          "hide_name": 1,
+          "type": "$lut",
+          "parameters": {
+            "LUT": "0111",
+            "WIDTH": "00000000000000000000000000000010"
+          },
+          "attributes": {
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 9, 11 ],
+            "Y": [ 7 ]
+          }
+        },
+        "$auto$blifparse.cc:535:parse_blif$6": {
+          "hide_name": 1,
+          "type": "$lut",
+          "parameters": {
+            "LUT": "0111",
+            "WIDTH": "00000000000000000000000000000010"
+          },
+          "attributes": {
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 11, 12 ],
+            "Y": [ 8 ]
+          }
+        }
+      },
+      "netnames": {
+        "G1gat": {
+          "hide_name": 0,
+          "bits": [ 2 ],
+          "attributes": {
+          }
+        },
+        "G22gat": {
+          "hide_name": 0,
+          "bits": [ 7 ],
+          "attributes": {
+          }
+        },
+        "G23gat": {
+          "hide_name": 0,
+          "bits": [ 8 ],
+          "attributes": {
+          }
+        },
+        "G2gat": {
+          "hide_name": 0,
+          "bits": [ 3 ],
+          "attributes": {
+          }
+        },
+        "G3gat": {
+          "hide_name": 0,
+          "bits": [ 4 ],
+          "attributes": {
+          }
+        },
+        "G6gat": {
+          "hide_name": 0,
+          "bits": [ 5 ],
+          "attributes": {
+          }
+        },
+        "G7gat": {
+          "hide_name": 0,
+          "bits": [ 6 ],
+          "attributes": {
+          }
+        },
+        "n10": {
+          "hide_name": 0,
+          "bits": [ 12 ],
+          "attributes": {
+          }
+        },
+        "n7": {
+          "hide_name": 0,
+          "bits": [ 9 ],
+          "attributes": {
+          }
+        },
+        "n8": {
+          "hide_name": 0,
+          "bits": [ 10 ],
+          "attributes": {
+          }
+        },
+        "n9": {
+          "hide_name": 0,
+          "bits": [ 11 ],
+          "attributes": {
+          }
+        }
+      }
+    }
+  }
+}

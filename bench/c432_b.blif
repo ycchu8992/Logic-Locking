@@ -1,0 +1,346 @@
+# Benchmark "c432_cap" written by ABC on Tue Jun 25 22:51:54 2024
+.model c432_cap
+.inputs G1gat G4gat G8gat G11gat G14gat G17gat G21gat G24gat G27gat G30gat \
+ G34gat G37gat G40gat G43gat G47gat G50gat G53gat G56gat G60gat G63gat \
+ G66gat G69gat G73gat G76gat G79gat G82gat G86gat G89gat G92gat G95gat \
+ G99gat G102gat G105gat G108gat G112gat G115gat
+.outputs G223gat G329gat G370gat G421gat G430gat G431gat G432gat
+.names G1gat n43
+0 1
+.names G4gat n44
+0 1
+.names G11gat n45
+0 1
+.names G17gat n46
+0 1
+.names G24gat n47
+0 1
+.names G30gat n48
+0 1
+.names G37gat n49
+0 1
+.names G43gat n50
+0 1
+.names G50gat n51
+0 1
+.names G56gat n52
+0 1
+.names G63gat n53
+0 1
+.names G69gat n54
+0 1
+.names G76gat n55
+0 1
+.names G82gat n56
+0 1
+.names G89gat n57
+0 1
+.names G95gat n58
+0 1
+.names G102gat n59
+0 1
+.names G108gat n60
+0 1
+.names n43 G4gat n61
+11 0
+.names G8gat n44 n62
+00 1
+.names G14gat n44 n63
+00 1
+.names n45 G17gat n64
+11 0
+.names n47 G30gat n65
+11 0
+.names n49 G43gat n66
+11 0
+.names n51 G56gat n67
+11 0
+.names n53 G69gat n68
+11 0
+.names n55 G82gat n69
+11 0
+.names n57 G95gat n70
+11 0
+.names n59 G108gat n71
+11 0
+.names G21gat n46 n72
+00 1
+.names G27gat n46 n73
+00 1
+.names G34gat n48 n74
+00 1
+.names G40gat n48 n75
+00 1
+.names G47gat n50 n76
+00 1
+.names G53gat n50 n77
+00 1
+.names G60gat n52 n78
+00 1
+.names G66gat n52 n79
+00 1
+.names G73gat n54 n80
+00 1
+.names G79gat n54 n81
+00 1
+.names G86gat n56 n82
+00 1
+.names G92gat n56 n83
+00 1
+.names G99gat n58 n84
+00 1
+.names G105gat n58 n85
+00 1
+.names G112gat n60 n86
+00 1
+.names G115gat n60 n87
+00 1
+.names n61 n64 n65 n66 n67 n68 n69 n70 n71 n88
+111111111 1
+.names n88 n89
+0 1
+.names n88 n90
+0 1
+.names n88 G223gat
+0 1
+.names n89 n61 n92
+01 1
+10 1
+.names n89 n64 n93
+01 1
+10 1
+.names n89 n65 n94
+01 1
+10 1
+.names n89 n66 n95
+01 1
+10 1
+.names n89 n67 n96
+01 1
+10 1
+.names n89 n68 n97
+01 1
+10 1
+.names G1gat n90 n98
+11 0
+.names n89 n69 n99
+01 1
+10 1
+.names n90 G11gat n100
+11 0
+.names n89 n70 n101
+01 1
+10 1
+.names n90 G24gat n102
+11 0
+.names n89 n71 n103
+01 1
+10 1
+.names n90 G37gat n104
+11 0
+.names n90 G50gat n105
+11 0
+.names n90 G63gat n106
+11 0
+.names n90 G76gat n107
+11 0
+.names n90 G89gat n108
+11 0
+.names n90 G102gat n109
+11 0
+.names n92 n62 n110
+11 0
+.names n92 n63 n111
+11 0
+.names n93 n72 n112
+11 0
+.names n94 n74 n113
+11 0
+.names n95 n76 n114
+11 0
+.names n96 n78 n115
+11 0
+.names n97 n80 n116
+11 0
+.names n99 n82 n117
+11 0
+.names n101 n84 n118
+11 0
+.names n103 n86 n119
+11 0
+.names n93 n73 n120
+11 0
+.names n94 n75 n121
+11 0
+.names n95 n77 n122
+11 0
+.names n96 n79 n123
+11 0
+.names n97 n81 n124
+11 0
+.names n99 n83 n125
+11 0
+.names n101 n85 n126
+11 0
+.names n103 n87 n127
+11 0
+.names n110 n112 n113 n114 n115 n116 n117 n118 n119 n128
+111111111 1
+.names n111 n129
+0 1
+.names n120 n130
+0 1
+.names n121 n131
+0 1
+.names n122 n132
+0 1
+.names n123 n133
+0 1
+.names n124 n134
+0 1
+.names n125 n135
+0 1
+.names n126 n136
+0 1
+.names n127 n137
+0 1
+.names n128 n138
+0 1
+.names n128 n139
+0 1
+.names n128 G329gat
+0 1
+.names n138 n110 n141
+01 1
+10 1
+.names n138 n112 n142
+01 1
+10 1
+.names n138 n113 n143
+01 1
+10 1
+.names n138 n114 n144
+01 1
+10 1
+.names G8gat n139 n145
+11 0
+.names n138 n115 n146
+01 1
+10 1
+.names n139 G21gat n147
+11 0
+.names n138 n116 n148
+01 1
+10 1
+.names n139 G34gat n149
+11 0
+.names n138 n117 n150
+01 1
+10 1
+.names n139 G47gat n151
+11 0
+.names n138 n118 n152
+01 1
+10 1
+.names n139 G60gat n153
+11 0
+.names n138 n119 n154
+01 1
+10 1
+.names n139 G73gat n155
+11 0
+.names n139 G86gat n156
+11 0
+.names n139 G99gat n157
+11 0
+.names n139 G112gat n158
+11 0
+.names n141 n129 n159
+11 0
+.names n142 n130 n160
+11 0
+.names n143 n131 n161
+11 0
+.names n144 n132 n162
+11 0
+.names n146 n133 n163
+11 0
+.names n148 n134 n164
+11 0
+.names n150 n135 n165
+11 0
+.names n152 n136 n166
+11 0
+.names n154 n137 n167
+11 0
+.names n159 n160 n161 n162 n163 n164 n165 n166 n167 n168
+111111111 1
+.names n168 n169
+0 1
+.names n168 G370gat
+0 1
+.names G14gat n169 n171
+11 0
+.names n169 G27gat n172
+11 0
+.names n169 G40gat n173
+11 0
+.names n169 G53gat n174
+11 0
+.names n169 G66gat n175
+11 0
+.names n169 G79gat n176
+11 0
+.names n169 G92gat n177
+11 0
+.names n169 G105gat n178
+11 0
+.names n169 G115gat n179
+11 0
+.names G4gat n98 n145 n171 n180
+1111 0
+.names n100 n147 n172 G17gat n181
+1111 0
+.names n102 n149 n173 G30gat n182
+1111 0
+.names n104 n151 n174 G43gat n183
+1111 0
+.names n105 n153 n175 G56gat n184
+1111 0
+.names n106 n155 n176 G69gat n185
+1111 0
+.names n107 n156 n177 G82gat n186
+1111 0
+.names n108 n157 n178 G95gat n187
+1111 0
+.names n109 n158 n179 G108gat n188
+1111 0
+.names n180 n189
+0 1
+.names n181 n182 n183 n184 n185 n186 n187 n188 n190
+11111111 1
+.names n183 n191
+0 1
+.names n185 n192
+0 1
+.names n186 n193
+0 1
+.names n187 n194
+0 1
+.names n189 n190 G421gat
+00 1
+.names n182 n191 n196
+11 0
+.names n182 n183 n192 n184 n197
+1111 0
+.names n184 n183 n193 n198
+111 0
+.names n182 n183 n186 n194 n199
+1111 0
+.names n181 n182 n196 n184 G430gat
+1111 0
+.names n181 n182 n197 n198 G431gat
+1111 0
+.names n181 n196 n197 n199 G432gat
+1111 0
+.end

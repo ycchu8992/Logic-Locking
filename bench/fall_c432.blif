@@ -1,0 +1,716 @@
+# Benchmark "fall_c432" written by ABC on Wed Jun 26 07:11:51 2024
+.model fall_c432
+.inputs G1gat G4gat G8gat G11gat G14gat G17gat G21gat G24gat G27gat G30gat \
+ G34gat G37gat G40gat G43gat G47gat G50gat G53gat G56gat G60gat G63gat \
+ G66gat G69gat G73gat G76gat G79gat G82gat G86gat G89gat G92gat G95gat \
+ G99gat G102gat G105gat G108gat G112gat G115gat key0 key1 key2 key3 key4 \
+ key5 key6 key7 key8 key9 key10 key11 key12 key13 key14 key15 key16 key17 \
+ key18 key19 key20 key21 key22 key23 key24 key25 key26 key27 key28 key29 \
+ key30 key31 key32 key33 key34 key35 key36 key37 key38 key39 key40 key41 \
+ key42 key43 key44 key45 key46 key47 key48 key49 key50 key51 key52 key53 \
+ key54 key55 key56 key57 key58 key59 key60 key61 key62 key63 key64 key65 \
+ key66 key67 key68 key69 key70 key71 key72 key73 key74 key75 key76 key77 \
+ key78 key79 key80 key81 key82 key83 key84 key85 key86 key87 key88 key89 \
+ key90 key91 key92 key93 key94 key95 key96 key97 key98 key99 key100 key101 \
+ key102 key103 key104 key105 key106 key107 key108 key109 key110 key111 \
+ key112 key113 key114 key115 key116 key117 key118 key119
+.outputs G223gat G329gat G370gat G421gat G430gat G431gat G432gat
+.names G1gat n163
+0 1
+.names n163 key31 n164
+01 1
+10 1
+.names G4gat n165
+0 1
+.names n165 key26 n166
+01 1
+10 1
+.names G11gat n167
+0 1
+.names n167 key36 n168
+01 1
+10 1
+.names G17gat n169
+0 1
+.names n169 key41 n170
+01 1
+10 1
+.names G24gat n171
+0 1
+.names n171 key49 n172
+01 1
+10 1
+.names G30gat n173
+0 1
+.names n173 key50 n174
+01 1
+10 1
+.names G37gat n175
+0 1
+.names n175 key51 n176
+01 1
+10 1
+.names G43gat n177
+0 1
+.names n177 key52 n178
+01 1
+10 1
+.names G50gat n179
+0 1
+.names n179 key53 n180
+01 1
+10 1
+.names G56gat n181
+0 1
+.names n181 key54 n182
+01 1
+10 1
+.names G63gat n183
+0 1
+.names n183 key55 n184
+01 1
+10 1
+.names G69gat n185
+0 1
+.names n185 key56 n186
+01 1
+10 1
+.names G76gat n187
+0 1
+.names n187 key57 n188
+01 1
+10 1
+.names G82gat n189
+0 1
+.names n189 key58 n190
+01 1
+10 1
+.names G89gat n191
+0 1
+.names n191 key59 n192
+01 1
+10 1
+.names G95gat n193
+0 1
+.names n193 key60 n194
+01 1
+10 1
+.names G102gat n195
+0 1
+.names n195 key61 n196
+01 1
+10 1
+.names G108gat n197
+0 1
+.names n197 key62 n198
+01 1
+10 1
+.names n164 G4gat n199
+11 0
+.names n199 key2 n200
+01 1
+10 1
+.names G8gat n166 n201
+00 1
+.names n201 key28 n202
+01 1
+10 1
+.names G14gat n166 n203
+00 1
+.names n203 key63 n204
+01 1
+10 1
+.names n168 G17gat n205
+11 0
+.names n205 key25 n206
+01 1
+10 1
+.names n172 G30gat n207
+11 0
+.names n207 key64 n208
+01 1
+10 1
+.names n176 G43gat n209
+11 0
+.names n209 key65 n210
+01 1
+10 1
+.names n180 G56gat n211
+11 0
+.names n211 key66 n212
+01 1
+10 1
+.names n184 G69gat n213
+11 0
+.names n213 key67 n214
+01 1
+10 1
+.names n188 G82gat n215
+11 0
+.names n215 key68 n216
+01 1
+10 1
+.names n192 G95gat n217
+11 0
+.names n217 key69 n218
+01 1
+10 1
+.names n196 G108gat n219
+11 0
+.names n219 key70 n220
+01 1
+10 1
+.names G21gat n170 n221
+00 1
+.names n221 key37 n222
+01 1
+10 1
+.names G27gat n170 n223
+00 1
+.names n223 key38 n224
+01 1
+10 1
+.names G34gat n174 n225
+00 1
+.names n225 key71 n226
+01 1
+10 1
+.names G40gat n174 n227
+00 1
+.names n227 key72 n228
+01 1
+10 1
+.names G47gat n178 n229
+00 1
+.names n229 key73 n230
+01 1
+10 1
+.names G53gat n178 n231
+00 1
+.names n231 key74 n232
+01 1
+10 1
+.names G60gat n182 n233
+00 1
+.names n233 key75 n234
+01 1
+10 1
+.names G66gat n182 n235
+00 1
+.names n235 key76 n236
+01 1
+10 1
+.names G73gat n186 n237
+00 1
+.names n237 key77 n238
+01 1
+10 1
+.names G79gat n186 n239
+00 1
+.names n239 key78 n240
+01 1
+10 1
+.names G86gat n190 n241
+00 1
+.names n241 key79 n242
+01 1
+10 1
+.names G92gat n190 n243
+00 1
+.names n243 key80 n244
+01 1
+10 1
+.names G99gat n194 n245
+00 1
+.names n245 key81 n246
+01 1
+10 1
+.names G105gat n194 n247
+00 1
+.names n247 key82 n248
+01 1
+10 1
+.names G112gat n198 n249
+00 1
+.names n249 key83 n250
+01 1
+10 1
+.names G115gat n198 n251
+00 1
+.names n251 key84 n252
+01 1
+10 1
+.names n200 n206 n208 n210 n212 n214 n216 n218 n220 n253
+111111111 1
+.names n253 key30 n254
+01 1
+10 1
+.names n254 n255
+0 1
+.names n255 key27 n256
+01 1
+10 1
+.names n254 n257
+0 1
+.names n257 key11 n258
+01 1
+10 1
+.names n254 n259
+0 1
+.names n259 key7 G223gat
+01 1
+10 1
+.names n256 n200 n261
+01 1
+10 1
+.names n261 key29 n262
+01 1
+10 1
+.names n256 n206 n263
+01 1
+10 1
+.names n263 key40 n264
+01 1
+10 1
+.names n256 n208 n265
+01 1
+10 1
+.names n265 key85 n266
+01 1
+10 1
+.names n256 n210 n267
+01 1
+10 1
+.names n267 key86 n268
+01 1
+10 1
+.names n256 n212 n269
+01 1
+10 1
+.names n269 key87 n270
+01 1
+10 1
+.names n256 n214 n271
+01 1
+10 1
+.names n271 key88 n272
+01 1
+10 1
+.names G1gat n258 n273
+11 0
+.names n273 key42 n274
+01 1
+10 1
+.names n256 n216 n275
+01 1
+10 1
+.names n275 key89 n276
+01 1
+10 1
+.names n258 G11gat n277
+11 0
+.names n277 key9 n278
+01 1
+10 1
+.names n256 n218 n279
+01 1
+10 1
+.names n279 key90 n280
+01 1
+10 1
+.names n258 G24gat n281
+11 0
+.names n281 key14 n282
+01 1
+10 1
+.names n256 n220 n283
+01 1
+10 1
+.names n283 key91 n284
+01 1
+10 1
+.names n258 G37gat n285
+11 0
+.names n285 key32 n286
+01 1
+10 1
+.names n258 G50gat n287
+11 0
+.names n287 key92 n288
+01 1
+10 1
+.names n258 G63gat n289
+11 0
+.names n289 key93 n290
+01 1
+10 1
+.names n258 G76gat n291
+11 0
+.names n291 key94 n292
+01 1
+10 1
+.names n258 G89gat n293
+11 0
+.names n293 key95 n294
+01 1
+10 1
+.names n258 G102gat n295
+11 0
+.names n295 key96 n296
+01 1
+10 1
+.names n262 n202 n297
+11 0
+.names n297 key1 n298
+01 1
+10 1
+.names n262 n204 n299
+11 0
+.names n299 key47 n300
+01 1
+10 1
+.names n264 n222 n301
+11 0
+.names n301 key17 n302
+01 1
+10 1
+.names n266 n226 n303
+11 0
+.names n303 key97 n304
+01 1
+10 1
+.names n268 n230 n305
+11 0
+.names n305 key98 n306
+01 1
+10 1
+.names n270 n234 n307
+11 0
+.names n307 key99 n308
+01 1
+10 1
+.names n272 n238 n309
+11 0
+.names n309 key100 n310
+01 1
+10 1
+.names n276 n242 n311
+11 0
+.names n311 key101 n312
+01 1
+10 1
+.names n280 n246 n313
+11 0
+.names n313 key102 n314
+01 1
+10 1
+.names n284 n250 n315
+11 0
+.names n315 key103 n316
+01 1
+10 1
+.names n264 n224 n317
+11 0
+.names n317 key16 n318
+01 1
+10 1
+.names n266 n228 n319
+11 0
+.names n319 key104 n320
+01 1
+10 1
+.names n268 n232 n321
+11 0
+.names n321 key105 n322
+01 1
+10 1
+.names n270 n236 n323
+11 0
+.names n323 key106 n324
+01 1
+10 1
+.names n272 n240 n325
+11 0
+.names n325 key107 n326
+01 1
+10 1
+.names n276 n244 n327
+11 0
+.names n327 key108 n328
+01 1
+10 1
+.names n280 n248 n329
+11 0
+.names n329 key109 n330
+01 1
+10 1
+.names n284 n252 n331
+11 0
+.names n331 key110 n332
+01 1
+10 1
+.names n298 n302 n304 n306 n308 n310 n312 n314 n316 n333
+111111111 1
+.names n333 key0 n334
+01 1
+10 1
+.names n300 n335
+0 1
+.names n335 key48 n336
+01 1
+10 1
+.names n318 n337
+0 1
+.names n337 key39 n338
+01 1
+10 1
+.names n320 n339
+0 1
+.names n339 key111 n340
+01 1
+10 1
+.names n322 n341
+0 1
+.names n341 key112 n342
+01 1
+10 1
+.names n324 n343
+0 1
+.names n343 key113 n344
+01 1
+10 1
+.names n326 n345
+0 1
+.names n345 key114 n346
+01 1
+10 1
+.names n328 n347
+0 1
+.names n347 key115 n348
+01 1
+10 1
+.names n330 n349
+0 1
+.names n349 key116 n350
+01 1
+10 1
+.names n332 n351
+0 1
+.names n351 key117 n352
+01 1
+10 1
+.names n334 n353
+0 1
+.names n353 key46 n354
+01 1
+10 1
+.names n334 n355
+0 1
+.names n355 key44 n356
+01 1
+10 1
+.names n334 n357
+0 1
+.names n357 key43 G329gat
+01 1
+10 1
+.names n354 n298 n359
+01 1
+10 1
+.names n359 key118 n360
+01 1
+10 1
+.names n354 n302 n361
+01 1
+10 1
+.names n361 key18 n362
+01 1
+10 1
+.names n354 n304 n363
+01 1
+10 1
+.names n363 key119 n364
+01 1
+10 1
+.names n354 n306 n365
+01 1
+10 1
+.names G8gat n356 n366
+11 0
+.names n354 n308 n367
+01 1
+10 1
+.names n356 G21gat n368
+11 0
+.names n368 key8 n369
+01 1
+10 1
+.names n354 n310 n370
+01 1
+10 1
+.names n356 G34gat n371
+11 0
+.names n371 key15 n372
+01 1
+10 1
+.names n354 n312 n373
+01 1
+10 1
+.names n356 G47gat n374
+11 0
+.names n374 key33 n375
+01 1
+10 1
+.names n354 n314 n376
+01 1
+10 1
+.names n356 G60gat n377
+11 0
+.names n354 n316 n378
+01 1
+10 1
+.names n356 G73gat n379
+11 0
+.names n356 G86gat n380
+11 0
+.names n356 G99gat n381
+11 0
+.names n356 G112gat n382
+11 0
+.names n360 n336 n383
+11 0
+.names n383 key3 n384
+01 1
+10 1
+.names n362 n338 n385
+11 0
+.names n385 key6 n386
+01 1
+10 1
+.names n364 n340 n387
+11 0
+.names n365 n342 n388
+11 0
+.names n367 n344 n389
+11 0
+.names n370 n346 n390
+11 0
+.names n373 n348 n391
+11 0
+.names n376 n350 n392
+11 0
+.names n378 n352 n393
+11 0
+.names n384 n386 n387 n388 n389 n390 n391 n392 n393 n394
+111111111 1
+.names n394 key4 n395
+01 1
+10 1
+.names n395 n396
+0 1
+.names n395 n397
+0 1
+.names n397 key5 G370gat
+01 1
+10 1
+.names G14gat n396 n399
+11 0
+.names n396 G27gat n400
+11 0
+.names n396 G40gat n401
+11 0
+.names n396 G53gat n402
+11 0
+.names n396 G66gat n403
+11 0
+.names n396 G79gat n404
+11 0
+.names n396 G92gat n405
+11 0
+.names n396 G105gat n406
+11 0
+.names n396 G115gat n407
+11 0
+.names G4gat n274 n366 n399 n408
+1111 0
+.names n408 key20 n409
+01 1
+10 1
+.names n278 n369 n400 G17gat n410
+1111 0
+.names n410 key10 n411
+01 1
+10 1
+.names n282 n372 n401 G30gat n412
+1111 0
+.names n412 key22 n413
+01 1
+10 1
+.names n286 n375 n402 G43gat n414
+1111 0
+.names n414 key34 n415
+01 1
+10 1
+.names n288 n377 n403 G56gat n416
+1111 0
+.names n290 n379 n404 G69gat n417
+1111 0
+.names n292 n380 n405 G82gat n418
+1111 0
+.names n294 n381 n406 G95gat n419
+1111 0
+.names n296 n382 n407 G108gat n420
+1111 0
+.names n409 n421
+0 1
+.names n421 key21 n422
+01 1
+10 1
+.names n411 n413 n415 n416 n417 n418 n419 n420 n423
+11111111 1
+.names n423 key35 n424
+01 1
+10 1
+.names n415 n425
+0 1
+.names n425 key45 n426
+01 1
+10 1
+.names n417 n427
+0 1
+.names n418 n428
+0 1
+.names n419 n429
+0 1
+.names n422 n424 n430
+00 1
+.names n430 key19 G421gat
+01 1
+10 1
+.names n413 n426 n432
+11 0
+.names n432 key24 n433
+01 1
+10 1
+.names n413 n415 n427 n416 n434
+1111 0
+.names n416 n415 n428 n435
+111 0
+.names n413 n415 n418 n429 n436
+1111 0
+.names n411 n413 n433 n416 n437
+1111 0
+.names n437 key12 G430gat
+01 1
+10 1
+.names n411 n413 n434 n435 n439
+1111 0
+.names n439 key13 G431gat
+01 1
+10 1
+.names n411 n433 n434 n436 n441
+1111 0
+.names n441 key23 G432gat
+01 1
+10 1
+.end
