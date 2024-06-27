@@ -42,6 +42,203 @@ enum GateType {
     STUCK_AT_1
 };
 
+void parse_bench(const string &file_path, vector<string> &inputs, vector<string> &outputs, vector<Gate> &gates);
+
+uint64_t evaluate_gate(const Gate &gate, const unordered_map<string, uint64_t> &values);
+
+unordered_map<string, uint64_t> simulate_circuit(const vector<string> &inputs, const vector<Gate> &gates, const vector<uint64_t> &input_values);
+
+vector<Gate> inject_fault(const vector<Gate> &gates, const int &faulty_gate_idx, bool stuck_at_value);
+
+vector<vector<uint64_t>> generate_input_vectors(int num_vectors, int vector_size, string key_string);
+
+string fault_impact(const vector<vector<uint64_t>> &input_patterns, vector<Gate> &gates, vector<string> &inputs, vector<string> &outputs);
+
+void insert_key_gate(vector<Gate> &gates, vector<string> &inputs, const string &max_faulty_gate, const int &key_pos, const int &key_size);
+
+
+int main(int argc, char *argv[]) {
+    string bench_name = argv[1];
+    string file_path = "bench/" + bench_name + ".bench";
+    vector<string> inputs;
+    vector<string> outputs;
+    vector<Gate> gates;
+
+    parse_bench(file_path, inputs, outputs, gates);
+
+    int no_not_buf = 0;
+    for (auto &gate: gates) {
+        if (gate.type == NOT || gate.type == BUF) {
+            no_not_buf++;
+        }
+    }
+    
+    int key_size = (gates.size() - no_not_buf);
+	if(key_size > 128) key_size = 128;
+    
+	string str = "11101010010001001011111010100100010010111110101001000100101111101010010001001011010111101000101010010100010100100101000010010101";
+    reverse(str.begin(), str.end()); // Since bitset is access from right to left
+
+    // Test patterns
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> dis(0, 1);
+    std::bitset<128> wrong_key;
+    for (int i = 0; i < key_size; i++) {
+        wrong_key[i] = dis(gen);
+    }
+    string wrong_key_str = wrong_key.to_string();
+    vector<vector<uint64_t>> input_vectors = generate_input_vectors(1024, inputs.size(), wrong_key_str.substr(0, key_size));
+
+    progress = 0;
+    workload = gates.size() * 2 * input_vectors.size() * key_size;
+
+    // Location selection phase
+    #ifdef IS_PROFILING
+    cout << "##Profiling mode##\n";
+    sim_faulty_circuit = std::chrono::duration<double, std::milli>(0);
+    caculate_impact = std::chrono::duration<double, std::milli>(0);
+    total_time = std::chrono::duration<double, std::milli>(0);
+
+    auto start_total = chrono::high_resolution_clock::now();
+    #endif
+
+    for (int i = 0; i < key_size; i++) {
+        // for (int j = 0; j < key_size; j++) {
+        //     wrong_key[j] = dis(gen);
+        // }
+        // string wrong_key_str = wrong_key.to_string();
+        // vector<vector<uint64_t>> input_vectors = generate_input_vectors(960, inputs.size(), wrong_key_str.substr(0, key_size));
+
+        string max_faulty_gate = fault_impact(input_vectors, gates, inputs, outputs);
+        if (max_faulty_gate == "") {
+            cout << "No fault impact gate found\n";
+            // Shrinking the key size
+            key_size = i;
+            break;
+        }
+        #ifdef SHOW_INFO
+        cout << "Max fault impact gate: " << max_faulty_gate << "                  \n";
+        #endif
+        insert_key_gate(gates, inputs, max_faulty_gate, i, key_size);
+    }
+
+    #ifdef IS_PROFILING
+    auto end_total = chrono::high_resolution_clock::now();
+    total_time = end_total - start_total;
+    cout << "Total time on fault analysis: " << total_time.count() << " ms\n";
+    cout << "Time on simulating faulty circuit: " << sim_faulty_circuit.count() << " ms\n";
+    cout << "Time on calculating impact: " << caculate_impact.count() << " ms\n";
+    // Proportion of time on simulating faulty circuit
+    cout << "Proportion of time on simulating faulty circuit: " << sim_faulty_circuit.count() / total_time.count() * 100 << "%\n";
+    // Proportion of time on calculating impact
+    cout << "Proportion of time on calculating impact: " << caculate_impact.count() / total_time.count() * 100 << "%\n";
+    // Proportion of remaining time
+    cout << "Proportion of remaining time: " << (total_time.count() - sim_faulty_circuit.count() - caculate_impact.count()) / total_time.count() * 100 << "%\n";
+    #endif
+
+    cout << "Key size: " << key_size << "\n";
+    cout << "Key: ";
+    for (int i = 0; i < key_size; i++) {
+        cout << str[127-i];
+    }
+    cout << "\n";
+
+    vector<int> key_gate_indices(key_size);
+    for (int i = 0; i < key_size; i++) {
+        for (size_t j = 0; j < gates.size(); ++j) {
+            if (gates[j].key_gate_id == i) {
+                key_gate_indices[i] = j;
+                break;
+            }
+        }
+    }
+
+    // Modification phase
+    std::bitset<128> R;
+    for (int i = 0; i < 128; i++) {
+        R[i] = dis(gen);
+    }
+
+    for (int i = 0; i < key_size; i++) {
+        if (R[i]) {
+            int kg_id = key_gate_indices[i];
+            gates.insert(gates.begin() + kg_id + 1, {gates[kg_id].name, NOT, {"locked_inv_" + gates[kg_id].name}, {0, 0}, {0, 0}, false});
+            gates[kg_id].name = "locked_inv_" + gates[kg_id].name;
+            for (auto &kg_id_i : key_gate_indices) {
+                if (kg_id_i > kg_id) {
+                    kg_id_i++;
+                }
+            }
+        }
+    }
+
+    std::bitset<128> encryption_key(str);
+    R ^= encryption_key;
+
+    for (int i = 0; i < key_size; i++) {
+        if (R[i]) {
+            gates[key_gate_indices[i]].type = XNOR;
+        }
+    }
+
+    // Generate new bench file
+    ofstream new_file("bench/fall_" + bench_name + ".bench");
+    for (const auto &input : inputs) {
+        new_file << "INPUT(" << input << ")\n";
+    }
+
+    for (const auto &output : outputs) {
+        new_file << "OUTPUT(" << output << ")\n";
+    }
+
+    for (const auto &gate : gates) {
+        string gate_type;
+        switch (gate.type)
+        {
+        case AND:
+            gate_type = "AND";
+            break;
+        case NAND:
+            gate_type = "NAND";
+            break;
+        case OR:
+            gate_type = "OR";
+            break;
+        case NOR:
+            gate_type = "NOR";
+            break;
+        case XOR:
+            gate_type = "XOR";
+            break;
+        case XNOR:
+            gate_type = "XNOR";
+            break;
+        case NOT:
+            gate_type = "NOT";
+            break;
+        case BUF:
+            gate_type = "BUF";
+            break;
+        default:
+            break;
+        }
+        new_file << gate.name << " = " << gate_type << "(";
+        for (size_t i = 0; i < gate.operands.size(); ++i) {
+            new_file << gate.operands[i];
+            if (i != gate.operands.size() - 1) {
+                new_file << ", ";
+            }
+        }
+        new_file << ")\n";
+    } 
+
+    new_file.close();
+
+    return 0;
+}
+
+
 void parse_bench(const string &file_path, vector<string> &inputs, vector<string> &outputs, vector<Gate> &gates) {
     ifstream file(file_path);
     string line;
@@ -347,186 +544,10 @@ void insert_key_gate(vector<Gate> &gates, vector<string> &inputs, const string &
     } else {
         gates.insert(it + 1, {max_faulty_gate, XOR, {"locked_" + max_faulty_gate, "keyinput" + to_string(key_pos)}, {0, 0}, {0, 0}, key_pos});
     }
+    #ifdef SHOW_INFO
     cout << key_pos + 1 << " / " << key_size << " key-gates inserted\n";
+    #endif
 }
 
 
-int main(int argc, char *argv[]) {
-    string bench_name = argv[1];
-    string file_path = "bench/" + bench_name + ".bench";
-    vector<string> inputs;
-    vector<string> outputs;
-    vector<Gate> gates;
 
-    parse_bench(file_path, inputs, outputs, gates);
-
-    int no_not_buf = 0;
-    for (auto &gate: gates) {
-        if (gate.type == NOT || gate.type == BUF) {
-            no_not_buf++;
-        }
-    }
-    
-
-    int key_size = (gates.size() - no_not_buf);
-	if(key_size > 128) key_size = 128;
-    
-	string str = "11101010010001001011111010100100010010111110101001000100101111101010010001001011010111101000101010010100010100100101000010010101";
-    reverse(str.begin(), str.end()); // Since bitset is access from right to left
-
-    // Test patterns
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> dis(0, 1);
-    std::bitset<128> wrong_key;
-    for (int i = 0; i < key_size; i++) {
-        wrong_key[i] = dis(gen);
-    }
-    string wrong_key_str = wrong_key.to_string();
-    vector<vector<uint64_t>> input_vectors = generate_input_vectors(1024, inputs.size(), wrong_key_str.substr(0, key_size));
-
-    progress = 0;
-    workload = gates.size() * 2 * input_vectors.size() * key_size;
-
-    // Location selection phase
-    #ifdef IS_PROFILING
-    cout << "##Profiling mode##\n";
-    sim_faulty_circuit = std::chrono::duration<double, std::milli>(0);
-    caculate_impact = std::chrono::duration<double, std::milli>(0);
-    total_time = std::chrono::duration<double, std::milli>(0);
-
-    auto start_total = chrono::high_resolution_clock::now();
-    #endif
-
-    for (int i = 0; i < key_size; i++) {
-        // for (int j = 0; j < key_size; j++) {
-        //     wrong_key[j] = dis(gen);
-        // }
-        // string wrong_key_str = wrong_key.to_string();
-        // vector<vector<uint64_t>> input_vectors = generate_input_vectors(960, inputs.size(), wrong_key_str.substr(0, key_size));
-
-        string max_faulty_gate = fault_impact(input_vectors, gates, inputs, outputs);
-        if (max_faulty_gate == "") {
-            cout << "No fault impact gate found\n";
-            // Shrinking the key size
-            key_size = i;
-            break;
-        }
-        cout << "Max fault impact gate: " << max_faulty_gate << "                  \n";
-        insert_key_gate(gates, inputs, max_faulty_gate, i, key_size);
-    }
-
-    #ifdef IS_PROFILING
-    auto end_total = chrono::high_resolution_clock::now();
-    total_time = end_total - start_total;
-    cout << "Total time on fault analysis: " << total_time.count() << " ms\n";
-    cout << "Time on simulating faulty circuit: " << sim_faulty_circuit.count() << " ms\n";
-    cout << "Time on calculating impact: " << caculate_impact.count() << " ms\n";
-    // Proportion of time on simulating faulty circuit
-    cout << "Proportion of time on simulating faulty circuit: " << sim_faulty_circuit.count() / total_time.count() * 100 << "%\n";
-    // Proportion of time on calculating impact
-    cout << "Proportion of time on calculating impact: " << caculate_impact.count() / total_time.count() * 100 << "%\n";
-    // Proportion of remaining time
-    cout << "Proportion of remaining time: " << (total_time.count() - sim_faulty_circuit.count() - caculate_impact.count()) / total_time.count() * 100 << "%\n";
-    #endif
-
-    cout << "Key size: " << key_size << "\n";
-    cout << "Key: ";
-    for (int i = 0; i < key_size; i++) {
-        cout << str[127-i];
-    }
-    cout << "\n";
-
-    vector<int> key_gate_indices(key_size);
-    for (int i = 0; i < key_size; i++) {
-        for (size_t j = 0; j < gates.size(); ++j) {
-            if (gates[j].key_gate_id == i) {
-                key_gate_indices[i] = j;
-                break;
-            }
-        }
-    }
-
-    // Modification phase
-    std::bitset<128> R;
-    for (int i = 0; i < 128; i++) {
-        R[i] = dis(gen);
-    }
-
-    for (int i = 0; i < key_size; i++) {
-        if (R[i]) {
-            int kg_id = key_gate_indices[i];
-            gates.insert(gates.begin() + kg_id + 1, {gates[kg_id].name, NOT, {"locked_inv_" + gates[kg_id].name}, {0, 0}, {0, 0}, false});
-            gates[kg_id].name = "locked_inv_" + gates[kg_id].name;
-            for (auto &kg_id_i : key_gate_indices) {
-                if (kg_id_i > kg_id) {
-                    kg_id_i++;
-                }
-            }
-        }
-    }
-
-    std::bitset<128> encryption_key(str);
-    R ^= encryption_key;
-
-    for (int i = 0; i < key_size; i++) {
-        if (R[i]) {
-            gates[key_gate_indices[i]].type = XNOR;
-        }
-    }
-
-    // Generate new bench file
-    ofstream new_file("bench/fall_" + bench_name + ".bench");
-    for (const auto &input : inputs) {
-        new_file << "INPUT(" << input << ")\n";
-    }
-
-    for (const auto &output : outputs) {
-        new_file << "OUTPUT(" << output << ")\n";
-    }
-
-    for (const auto &gate : gates) {
-        string gate_type;
-        switch (gate.type)
-        {
-        case AND:
-            gate_type = "AND";
-            break;
-        case NAND:
-            gate_type = "NAND";
-            break;
-        case OR:
-            gate_type = "OR";
-            break;
-        case NOR:
-            gate_type = "NOR";
-            break;
-        case XOR:
-            gate_type = "XOR";
-            break;
-        case XNOR:
-            gate_type = "XNOR";
-            break;
-        case NOT:
-            gate_type = "NOT";
-            break;
-        case BUF:
-            gate_type = "BUF";
-            break;
-        default:
-            break;
-        }
-        new_file << gate.name << " = " << gate_type << "(";
-        for (size_t i = 0; i < gate.operands.size(); ++i) {
-            new_file << gate.operands[i];
-            if (i != gate.operands.size() - 1) {
-                new_file << ", ";
-            }
-        }
-        new_file << ")\n";
-    } 
-
-    new_file.close();
-
-    return 0;
-}
