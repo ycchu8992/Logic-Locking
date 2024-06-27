@@ -59,6 +59,9 @@ void insert_key_gate(vector<Gate> &gates, vector<string> &inputs, const string &
 
 int main(int argc, char *argv[]) {
     string bench_name = argv[1];
+    if (argc == 3) {
+        bench_name = bench_name + "_" + (string)argv[2];
+    }
     string file_path = "bench/" + bench_name + ".bench";
     vector<string> inputs;
     vector<string> outputs;
@@ -91,7 +94,7 @@ int main(int argc, char *argv[]) {
     vector<vector<uint64_t>> input_vectors = generate_input_vectors(1024, inputs.size(), wrong_key_str.substr(0, key_size));
 
     progress = 0;
-    workload = gates.size() * 2 * input_vectors.size() * key_size;
+    workload = gates.size() * 2 * 16 * key_size;
 
     // Location selection phase
     #ifdef IS_PROFILING
@@ -108,7 +111,7 @@ int main(int argc, char *argv[]) {
         //     wrong_key[j] = dis(gen);
         // }
         // string wrong_key_str = wrong_key.to_string();
-        // vector<vector<uint64_t>> input_vectors = generate_input_vectors(960, inputs.size(), wrong_key_str.substr(0, key_size));
+        // vector<vector<uint64_t>> input_vectors = generate_input_vectors(1024, inputs.size(), wrong_key_str.substr(0, key_size));
 
         string max_faulty_gate = fault_impact(input_vectors, gates, inputs, outputs);
         if (max_faulty_gate == "") {
@@ -401,6 +404,7 @@ vector<vector<uint64_t>> generate_input_vectors(int num_vectors, int vector_size
 
     return input_vectors;
 }
+
 
 // For profiling
 #ifdef IS_PROFILING
