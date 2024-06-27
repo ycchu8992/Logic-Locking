@@ -190,6 +190,12 @@ int main(int argc, char *argv[]) {
     // Generate new bench file
     ofstream new_file("bench/fall_" + bench_name + bench_name_postfix + ".bench");
 
+    new_file << "# key=";
+    for (int i = 0; i < key_size; i++) {
+        new_file << str[127-i];
+    }
+    new_file << "\n";
+
     for (const auto &input : inputs) {
         new_file << "INPUT(" << input << ")\n";
     }
