@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
     cout << "Proportion of remaining time: " << (total_time.count() - sim_faulty_circuit.count() - caculate_impact.count()) / total_time.count() * 100 << "%\n";
     #endif
 
-    cout << "Key size: " << key_size << "\n";
+    cout << "Key size: " << key_size << "                          \n";
     cout << "Key: ";
     for (int i = 0; i < key_size; i++) {
         cout << str[127-i];

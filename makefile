@@ -24,6 +24,21 @@ $(TARGET): $(OBJ)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $<
 
+# lock
+lock_all: $(TARGET)
+	./$(TARGET) c17
+	./$(TARGET) c432
+	./$(TARGET) c3540
+
+lock_c17: $(TARGET)
+	./$(TARGET) c17
+
+lock_c432: $(TARGET)
+	./$(TARGET) c432
+
+lock_c3540: $(TARGET)
+	./$(TARGET) c3540
+
 # Clean target
 clean:
 	rm -f $(TARGET) $(OBJ)
